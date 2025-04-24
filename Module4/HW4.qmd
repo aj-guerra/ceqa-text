@@ -1,0 +1,78 @@
+---
+title: "POL290G Module 4 HW"
+author: "Aaron Guerra"
+format: pdf
+fontsize: 12pt
+classoption: oneside
+geometry: margin=1in
+mainfont: Times New Roman
+sansfont: Times New Roman
+number-sections: false
+pagestyle: plain
+suppress-bibliography: true
+execute:
+  eval: true
+---
+
+# Discussion Question:
+
+## 1. Say you had ten poems, five describing the winter season and five describing the summer. The words “snow” and “cold” appear a handful of times in the winter poems and not at all in the summer poems. Imagine the result of applying the TF-IDF measure we’ve discussed in this module to these poems. Would the result adequately capture the importance of the words “cold” and “snow” to the winter concept? How about under different applications of the TF-IDF measure?
+
+# Project Questions (show your work):
+
+## 1. Generate a list of the top terms/concepts in the data you tokenized from the pre-processing module (or another corpus, if you prefer).
+
+```{r}
+library(tidyverse)
+library(quanteda)
+library(quanteda.textstats)
+
+load('../Module3/combined_data.RData')
+
+```
+
+```{r}
+eir_data <- combined_data %>% 
+  filter(`Document Type` == 'EIR')
+
+eir_data_clean <- eir_data %>% 
+  filter(!grepl("withdrawn", `Document Title`, ignore.case = TRUE)) %>%
+  group_by(`SCH Number`) %>% 
+  filter(Recieved == max(Recieved)) %>% 
+  ungroup() %>% 
+  mutate(year = year(Recieved),
+         `Contact City` = str_to_title(`Contact City`))
+
+eir_corpus <- corpus(eir_data_clean, 
+                      docid_field = "SCH Number", 
+                      text_field = "Document Description")
+
+# see which tokens are most prevalent in the corpus
+all_tokens <- tokens(eir_corpus,  
+                   remove_symbols = TRUE,
+                   remove_punct = TRUE,
+                   remove_separators = TRUE) %>% 
+  tokens_tolower() %>%
+  tokens_remove(pattern = stopwords("en"))
+
+textstat_frequency(dfm(all_tokens)) %>% 
+  head(25)
+
+
+```
+
+## 2. Now generate a list of the top terms/concepts by group (e.g., by year).
+
+```{r}
+
+dfm(all_tokens) %>% 
+  textstat_frequency(groups = year) %>% 
+  head(25)
+
+```
+
+## 3. Create a word cloud of top terms representing each group How might we interpret these results?
+
+## 4. Now repeat steps #2 and #3 this time based on TF-IDF. How might we interpret these results?
+
+## 5. Finally, discuss: what worked and what didn’t, and why? Explain the similarities and differences between your two approaches and what you learned.
