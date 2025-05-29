@@ -1,0 +1,308 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+```{r}
+
+library(dplyr)
+library(stringr)
+library(pdftools)
+library(jsonlite)
+library(quanteda)
+
+pdf_files <- list.files(path = "../downloaded_pdfs", 
+                        pattern = "\\.pdf$", 
+                        full.names = TRUE)
+
+```
+
+```{r}
+#| warning: false
+
+plans_df <- data.frame(
+  plan_id = numeric(),
+  file_name = character(),
+  city_name = character(),
+  plan_year = numeric(),
+  plan_type = character(),
+  plan_length = numeric()
+)
+
+for (i in seq_along(pdf_files)) {
+  
+  tryCatch({
+    
+  file <- pdf_files[[i]]
+  text <- pdf_text(file)
+  
+  # metadata
+  file_name <- basename(file)
+  city_name <- str_sub(str_replace_all(str_remove(file_name, 
+                                          str_split_i(file_name, 
+                                                      "_",
+                                                      -1)),
+                               "_", 
+                               " "), 
+                       1, 
+                       -2)
+  
+  text_page1 <- gsub("\\s+", " ", text[1])
+  text_page2 <- gsub("\\s+", " ", text[2])
+  
+  plan_year <- as.numeric(tail(gsub(".pdf", "", 
+                               str_split(file_name, "_")[[1]]), 
+                               1))
+  
+  get_plan_type <- function(text) {
+    if (grepl("Environmental Justice Element", text, ignore.case = TRUE)) {
+      return("EJE")
+    } else if (grepl("Housing Element", text, ignore.case = TRUE)) {
+      return("HE")
+    } else if (grepl("General Plan", text, ignore.case = TRUE)) {
+      return("GP")
+    } else {
+      return("OTHER")
+    } }
+  
+    plan_type <- get_plan_type(text_page1)
+    
+    if (plan_type == "OTHER") {
+      plan_type <- get_plan_type(text_page2)
+    }
+  
+  plan_length <- length(text)
+  
+  # append metadata to dataframe
+  plan_df_temp <- data.frame(
+    plan_id = i,
+    file_name = file_name,
+    city_name = city_name,
+    plan_year = plan_year,
+    plan_type = plan_type,
+    plan_length = plan_length
+  )
+  plans_df <- rbind(plans_df, plan_df_temp)
+  
+  
+  # clean text and add to corpus
+  cleantext <- function(text) {
+    text <- gsub("\\s+", " ", text) # remove extra whitespace
+    return(text)
+  }
+  
+  text_cleaned <- as.character(lapply(text, cleantext))
+  
+  # create corpus
+  text_corpus_by_page <- corpus(text_cleaned,
+                        docnames = paste0(city_name, plan_year, "_", seq_along(text_cleaned)),
+                        docvars = data.frame(
+                          file_name = file_name,
+                          city_name = city_name,
+                          plan_year = plan_year,
+                          plan_type = plan_type
+                        ))
+  
+  text_cleaned_unlist <- str_c(text_cleaned, 
+                               collapse = '')
+  
+  text_corpus_doc <- corpus(text_cleaned_unlist,
+                        docnames = paste(city_name, plan_year),
+                        docvars = data.frame(
+                          file_name = file_name,
+                          city_name = city_name,
+                          plan_year = plan_year,
+                          plan_type = plan_type,
+                          plan_length = plan_length
+                        ))
+  
+  # combine all corpuses
+  if (i==1){
+    full_corpus_by_page <- text_corpus_by_page
+    full_corpus_doc <- text_corpus_doc
+  } else {
+    full_corpus_by_page <- full_corpus_by_page + text_corpus_by_page
+    full_corpus_doc <- full_corpus_doc + text_corpus_doc
+  }
+  
+  }, error = function(e) {
+    paste("Error processing file:", pdf_files[i], ":", e$message)
+  })
+}
+
+plans_df <- plans_df %>%
+  mutate(plan_type = case_when(
+    file_name == "Alameda_2022.pdf" ~ "GP",
+    file_name == "Benicia_2023.pdf" ~ "CHSE",
+    file_name == "Brisbane_2021.pdf" ~ "HE",
+    file_name == "Buena_Park_2022.pdf" ~ "HE",
+    file_name == "Canyon_Lake_2020.pdf" ~ "HE",
+    file_name == "Cudahy_2018.pdf" ~ "GP",
+    file_name == "Danville_2024.pdf" ~ "HE",
+    file_name == "Diamond_Bar_2019.pdf" ~ "GP",
+    file_name == "El_Cajon_2021.pdf" ~ "SE",
+    file_name == "La_Habra_2023.pdf" ~ "HE",
+    file_name == "Laguna_Hills_2024.pdf" ~ "HE",
+    file_name == "Lakewood_2022.pdf" ~ "HE",
+    file_name == "Loma_Linda_2022.pdf" ~ "HE",
+    file_name == "Madera_2009.pdf" ~ "GP",
+    file_name == "Montclair_2023.pdf" ~ "HE",
+    file_name == "Morro_Bay_2020.pdf" ~ "HE",
+    file_name == "National_City_2011.pdf" ~ "GP",
+    file_name == "Newport_Beach_2022.pdf" ~ "HE",
+    file_name == "Ontario_2022.pdf" ~ "HE",
+    file_name == "Piedmont_2023.pdf" ~ "HE",
+    file_name == "Pleasanton_2023.pdf" ~ "HE",
+    file_name == "Rancho_Santa_Margarita_2020.pdf" ~ "GP",
+    file_name == "Rialto_2023.pdf" ~ "EJE",
+    file_name == "Rio_Dell_2020.pdf" ~ "HE",
+    file_name == "Riverside_2021.pdf" ~ "EJE", #special case but treating as EJE
+    file_name == "San_Diego_2015.pdf" ~ "LUCPE",
+    file_name == "San_Luis_Obispo_2023.pdf" ~ "CASE",
+    file_name == "San_Ramon_2022.pdf" ~ "HE",
+    file_name == "Santa_Ana_2022.pdf" ~ "HE",
+    file_name == "Santa_Paula_2022.pdf" ~ "HE",
+    file_name == "Seal_Beach_2022.pdf" ~ "HE",
+    file_name == "Shafter_2024.pdf" ~ "HE",
+    file_name == "Solvang_2024.pdf" ~ "HE",
+    file_name == "Sunnyvale_2023.pdf" ~ "HE",
+    file_name == "Temple_City_2022.pdf" ~ "HE",
+    file_name == "Truckee_2019.pdf" ~ "HE",
+    file_name == "Union_City_2019.pdf" ~ "GP",
+    file_name == "Vacaville_2023.pdf" ~ "HE",
+    file_name == "Wasco_2024.pdf" ~ "HE",
+    file_name == "Wildomar_2021.pdf" ~ "SE",
+    file_name == "Yountville_2019.pdf" ~ "GP",
+    file_name == "Yuba_City_2022.pdf" ~ "HE",
+    file_name == "Sierra_Madre_2023.pdf" ~ "SE",
+    file_name == "Barstow_2021.pdf" ~ "SE",
+    file_name == "El_Centro_2021.pdf" ~ "GP",
+    TRUE ~ plan_type
+  )) %>% tibble()
+
+docvars(full_corpus_doc) <- docvars(full_corpus_doc) %>%
+  mutate(plan_type = case_when(
+    file_name == "Alameda_2022.pdf" ~ "GP",
+    file_name == "Benicia_2023.pdf" ~ "CHSE",
+    file_name == "Brisbane_2021.pdf" ~ "HE",
+    file_name == "Buena_Park_2022.pdf" ~ "HE",
+    file_name == "Canyon_Lake_2020.pdf" ~ "HE",
+    file_name == "Cudahy_2018.pdf" ~ "GP",
+    file_name == "Danville_2024.pdf" ~ "HE",
+    file_name == "Diamond_Bar_2019.pdf" ~ "GP",
+    file_name == "El_Cajon_2021.pdf" ~ "SE",
+    file_name == "La_Habra_2023.pdf" ~ "HE",
+    file_name == "Laguna_Hills_2024.pdf" ~ "HE",
+    file_name == "Lakewood_2022.pdf" ~ "HE",
+    file_name == "Loma_Linda_2022.pdf" ~ "HE",
+    file_name == "Madera_2009.pdf" ~ "GP",
+    file_name == "Montclair_2023.pdf" ~ "HE",
+    file_name == "Morro_Bay_2020.pdf" ~ "HE",
+    file_name == "National_City_2011.pdf" ~ "GP",
+    file_name == "Newport_Beach_2022.pdf" ~ "HE",
+    file_name == "Ontario_2022.pdf" ~ "HE",
+    file_name == "Piedmont_2023.pdf" ~ "HE",
+    file_name == "Pleasanton_2023.pdf" ~ "HE",
+    file_name == "Rancho_Santa_Margarita_2020.pdf" ~ "GP",
+    file_name == "Rialto_2023.pdf" ~ "EJE",
+    file_name == "Rio_Dell_2020.pdf" ~ "HE",
+    file_name == "Riverside_2021.pdf" ~ "EJE", #special case but treating as EJE
+    file_name == "San_Diego_2015.pdf" ~ "LUCPE",
+    file_name == "San_Luis_Obispo_2023.pdf" ~ "CASE",
+    file_name == "San_Ramon_2022.pdf" ~ "HE",
+    file_name == "Santa_Ana_2022.pdf" ~ "HE",
+    file_name == "Santa_Paula_2022.pdf" ~ "HE",
+    file_name == "Seal_Beach_2022.pdf" ~ "HE",
+    file_name == "Shafter_2024.pdf" ~ "HE",
+    file_name == "Solvang_2024.pdf" ~ "HE",
+    file_name == "Sunnyvale_2023.pdf" ~ "HE",
+    file_name == "Temple_City_2022.pdf" ~ "HE",
+    file_name == "Truckee_2019.pdf" ~ "HE",
+    file_name == "Union_City_2019.pdf" ~ "GP",
+    file_name == "Vacaville_2023.pdf" ~ "HE",
+    file_name == "Wasco_2024.pdf" ~ "HE",
+    file_name == "Wildomar_2021.pdf" ~ "SE",
+    file_name == "Yountville_2019.pdf" ~ "GP",
+    file_name == "Yuba_City_2022.pdf" ~ "HE",
+    file_name == "Sierra_Madre_2023.pdf" ~ "SE", 
+    file_name == "Barstow_2021.pdf" ~ "SE",
+    file_name == "El_Centro_2021.pdf" ~ "GP",
+    TRUE ~ plan_type
+  )) %>% tibble()
+
+docvars(full_corpus_by_page) <- docvars(full_corpus_by_page) %>%
+  mutate(plan_type = case_when(
+    file_name == "Alameda_2022.pdf" ~ "GP",
+    file_name == "Benicia_2023.pdf" ~ "CHSE",
+    file_name == "Brisbane_2021.pdf" ~ "HE",
+    file_name == "Buena_Park_2022.pdf" ~ "HE",
+    file_name == "Canyon_Lake_2020.pdf" ~ "HE",
+    file_name == "Cudahy_2018.pdf" ~ "GP",
+    file_name == "Danville_2024.pdf" ~ "HE",
+    file_name == "Diamond_Bar_2019.pdf" ~ "GP",
+    file_name == "El_Cajon_2021.pdf" ~ "SE",
+    file_name == "La_Habra_2023.pdf" ~ "HE",
+    file_name == "Laguna_Hills_2024.pdf" ~ "HE",
+    file_name == "Lakewood_2022.pdf" ~ "HE",
+    file_name == "Loma_Linda_2022.pdf" ~ "HE",
+    file_name == "Madera_2009.pdf" ~ "GP",
+    file_name == "Montclair_2023.pdf" ~ "HE",
+    file_name == "Morro_Bay_2020.pdf" ~ "HE",
+    file_name == "National_City_2011.pdf" ~ "GP",
+    file_name == "Newport_Beach_2022.pdf" ~ "HE",
+    file_name == "Ontario_2022.pdf" ~ "HE",
+    file_name == "Piedmont_2023.pdf" ~ "HE",
+    file_name == "Pleasanton_2023.pdf" ~ "HE",
+    file_name == "Rancho_Santa_Margarita_2020.pdf" ~ "GP",
+    file_name == "Rialto_2023.pdf" ~ "EJE",
+    file_name == "Rio_Dell_2020.pdf" ~ "HE",
+    file_name == "Riverside_2021.pdf" ~ "EJE", #special case but treating as EJE
+    file_name == "San_Diego_2015.pdf" ~ "LUCPE",
+    file_name == "San_Luis_Obispo_2023.pdf" ~ "CASE",
+    file_name == "San_Ramon_2022.pdf" ~ "HE",
+    file_name == "Santa_Ana_2022.pdf" ~ "HE",
+    file_name == "Santa_Paula_2022.pdf" ~ "HE",
+    file_name == "Seal_Beach_2022.pdf" ~ "HE",
+    file_name == "Shafter_2024.pdf" ~ "HE",
+    file_name == "Solvang_2024.pdf" ~ "HE",
+    file_name == "Sunnyvale_2023.pdf" ~ "HE",
+    file_name == "Temple_City_2022.pdf" ~ "HE",
+    file_name == "Truckee_2019.pdf" ~ "HE",
+    file_name == "Union_City_2019.pdf" ~ "GP",
+    file_name == "Vacaville_2023.pdf" ~ "HE",
+    file_name == "Wasco_2024.pdf" ~ "HE",
+    file_name == "Wildomar_2021.pdf" ~ "SE",
+    file_name == "Yountville_2019.pdf" ~ "GP",
+    file_name == "Yuba_City_2022.pdf" ~ "HE",
+    file_name == "Sierra_Madre_2023.pdf" ~ "SE", 
+    file_name == "Barstow_2021.pdf" ~ "SE",
+    file_name == "El_Centro_2021.pdf" ~ "GP",
+    TRUE ~ plan_type
+  )) %>% tibble()
+
+saveRDS(plans_df, file = "plans_df.rds")
+saveRDS(full_corpus_doc, file = "plans_corpus_doc.rds")
+saveRDS(full_corpus_by_page, file = "plans_corpus_by_page.rds")
+
+```
+
+```{r}
+
+others <- plans_df %>% 
+  filter(plan_type=='OTHER') %>% 
+  pull(file_name)
+
+empt <- data.frame()
+
+# make empty csv
+write.csv(empt, file = "temp.csv", row.names = FALSE)
+
+for (o in others){
+  txt <- (paste0('file_name == "', o, '" ~ "GP"'))
+  # write to new line in csv
+  write(txt, file = "temp.csv", append = TRUE)
+  
+}
+
+```

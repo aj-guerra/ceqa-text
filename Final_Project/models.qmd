@@ -1,0 +1,291 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(quanteda)
+library(quanteda.textstats)
+library(topicmodels)
+library(tidytext)
+library(tidycensus)
+library(stargazer)
+
+plans_df <- readRDS('plans_df.rds')
+plans_corpus_doc <- readRDS("plans_corpus_doc.rds")
+plan_corpus_by_page <- readRDS("plans_corpus_by_page.rds")
+
+```
+
+```{r}
+
+ej_corpus <- corpus_subset(plans_corpus_doc, 
+                           plan_type == "EJE")
+
+cities <- tolower(unlist(str_split(as.character(docvar_df$city_name), ' ')))
+counties <- tolower(unlist(str_split(unique(as.character(docvar_df$county)), ' ')))
+place_names_remove <- c(cities, 
+                        str_c(cities, "’s"), 
+                        counties)
+
+two_letters <- c()
+for (letter in letters) {
+  two_letters <- c(two_letters, str_c(letters, letter))
+  }
+
+ej_tokens_raw <- tokens(ej_corpus) %>% 
+  tokens_tolower()
+
+ej_tokens <- tokens(ej_corpus) %>% 
+  tokens_tolower() %>% 
+  tokens_remove(place_names_remove) %>%
+  tokens_remove(stopwords("en")) %>%
+  tokens_remove(c('st', 'ave', 'rd', 'blvd'))%>% 
+  tokens(split_hyphens = TRUE,
+         remove_punct = TRUE,
+         remove_symbols = TRUE,
+         remove_numbers = TRUE) %>%
+  tokens_remove(letters) %>% 
+  tokens_remove(two_letters) 
+
+# colloc <- textstat_collocations(ej_tokens, 
+#                                 size = 2:5,
+#                                 min_count = 100)
+# 
+# ej_tokens <- tokens_compound(ej_tokens, 
+#                              colloc,
+#                              concatenator = " ") 
+
+ej_dfm <- ej_tokens %>% 
+  dfm() %>% 
+  dfm_tfidf() %>% 
+  dfm_trim(min_docfreq = 2,
+           docfreq_type = "count")
+
+ej_dfm <- ej_dfm[rowSums(ej_dfm) > 0, ] 
+
+# ca_data <- get_acs(geography='place',
+#                        state='California',
+#                        variables = c('B01003_001', #population
+#                                      'B19013_001' # mhi
+#                                      ))
+
+census_data <- ca_data %>% 
+  mutate(city_name = str_remove(NAME, " city, California")) %>%
+  select(-c(NAME, moe, GEOID)) %>%
+  pivot_wider(names_from = variable,
+              values_from = estimate) %>% 
+  rename(population = B01003_001,
+         mhi = B19013_001) 
+
+docvar_df <- docvars(ej_dfm) %>% 
+  tibble() %>% 
+  cbind(docnames(ej_dfm)) %>% 
+  select(`docnames(ej_dfm)`, city_name, plan_year, plan_length) %>% 
+  rename(doc_id = `docnames(ej_dfm)`) %>% 
+  left_join(census_data, 
+            by = "city_name")  %>% 
+  mutate(pop_bin = ifelse(population > median(population), 1, 0),
+         mhi_bin = ifelse(mhi > median(mhi), 1, 0),
+         county = c('Contra Costa', #antioch
+                    'Kern', #arvin
+                    'Los Angeles', #gardena
+                    'Los Angeles', #inglewood
+                    'Los Angeles', #lynwood
+                    'Los Angeles', #maywood
+                    'San Mateo', #menlo park
+                    'Los Angeles', #monrovia
+                    'Alameda', #oakland
+                    'Riverside', #perris
+                    'San Bernardino', #rialto
+                    'Riverside', #riverside
+                    'Orange' #san juan capistrano
+                    ), 
+         consultant  = c('Urban Planning Partners Inc.', #antioch
+                    'City of Arvin', #arvin
+                    'City of Gardena', #gardena
+                    'Civic Solutions', #inglewood
+                    'Infrastructure Engineers', #lynwood
+                    'City of Maywood', #maywood
+                    'M-Group', #menlo park
+                    'City of Monrovia', #monrovia
+                    'Dyetta & Bhatia', #oakland
+                    'National Community Renaissance of California', #perris
+                    'Dudek', #rialto
+                    'City of Riverside', #riverside
+                    'City of San Juan Capistrano' #san juan capistrano
+                    ), 
+         used_consultant = c(1,
+                             0,
+                             0,
+                             1,
+                             1,
+                             0,
+                             1,
+                             0,
+                             1,
+                             1,
+                             1,
+                             0,
+                             0)
+         ) %>% 
+  select(-c(population, mhi))
+
+docvars(ej_dfm) <- docvar_df
+
+eje_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm,  method='cosine'))) %>% 
+  left_join(docvar_df, 
+            by = c("document1" = "doc_id")) %>% 
+  left_join(docvar_df, 
+            by = c("document2" = "doc_id")) %>% 
+  mutate(same_year = as.factor(ifelse(plan_year.x == plan_year.y, 1, 0)),
+         same_pop = as.factor(ifelse(pop_bin.x == pop_bin.y, 1, 0)),
+         same_mhi = as.factor(ifelse(mhi_bin.x == mhi_bin.y, 1, 0)),
+         same_county = as.factor(ifelse(county.x == county.y, 1, 0)),
+         both_used_consultant = as.factor(ifelse(used_consultant.x == 1 & used_consultant.y == 1, 1, 0)),
+         length_dif = abs(plan_length.x - plan_length.y)
+         ) %>%
+  select(-c(plan_year.x, plan_year.y, 
+            plan_length.x, plan_length.y, 
+            city_name.x, city_name.y,
+            pop_bin.x, pop_bin.y, 
+            mhi_bin.x, mhi_bin.y,
+            county.x, county.y))
+
+
+mod_1 <- lm(log(cosine) ~ both_used_consultant,
+            data = eje_sim_df) 
+
+mod_2 <- lm(log(cosine) ~ both_used_consultant + same_county + same_year,
+            data = eje_sim_df) 
+
+mod_3 <- lm(log(cosine) ~ both_used_consultant + same_pop + same_mhi ,
+            data = eje_sim_df) 
+
+mod_4 <- lm(log(cosine) ~ both_used_consultant + same_county + same_year + same_pop + same_mhi ,
+            data = eje_sim_df) 
+
+stargazer(mod_1, mod_2, mod_3, mod_4, type='text')
+
+
+```
+
+```{r}
+freqs <- ej_dfm %>%
+  textstat_frequency(groups=used_consultant, force=TRUE) %>%
+  group_by(group) %>%
+  slice_max(order_by = frequency, n = 20) %>%
+  arrange(group, desc(frequency)) %>% 
+  mutate(group = ifelse(group == 1, "Used Consultant", "Did Not Use Consultant")) %>% 
+  ungroup()
+
+appear_in_both <- count(freqs, feature) %>% 
+  filter(n>1) %>% 
+  pull(feature)
+
+freqs <- freqs %>% 
+  mutate(`Appears in Both` = as.factor(ifelse(feature %in% appear_in_both, 1, 0)) )
+
+
+freqs %>%
+  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
+  geom_col(aes(fill=`Appears in Both`)) +
+  facet_wrap(~ group, 
+             scales = "free_y") +
+  coord_flip() +
+  labs(x = "Feature", y = "Frequency") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+```{r}
+
+
+#corpus to dfm for plans_corpus_doc
+plans_tokens <- tokens(plans_corpus_doc,
+                       remove_punct = TRUE,
+                       remove_symbols = TRUE,
+                       remove_numbers = TRUE) 
+
+plans_tokens <- tokens_remove(plans_tokens, stopwords("en"))
+
+plans_dfm <- plans_tokens %>% 
+  tokens_wordstem() %>% 
+  dfm() %>%
+  dfm_trim(min_termfreq = 5,
+           min_docfreq = 5,
+           docfreq_type = "count") 
+
+plans_dfm <- plans_dfm[rowSums(plans_dfm) > 0, ] 
+
+#corpus to dfm for plans_corpus_by_page
+planbp_tokens <- tokens(plan_corpus_by_page,
+                       remove_punct = TRUE,
+                       remove_symbols = TRUE,
+                       remove_numbers = TRUE) 
+
+planbp_tokens <- tokens_remove(planbp_tokens, stopwords("en"))
+
+planbp_dfm <- planbp_tokens %>% 
+  tokens_wordstem() %>% 
+  dfm() %>%
+  dfm_trim(min_termfreq = 5,
+           min_docfreq = 5,
+           docfreq_type = "count") 
+
+planbp_dfm <- planbp_dfm[rowSums(planbp_dfm) > 0, ] 
+
+
+```
+
+```{r}
+# LDA
+plans_lda <- LDA(plans_dfm,
+    k = 30,
+    method='Gibbs',
+    control=list(iter = 300, 
+                 seed = 12345, 
+                 verbose = 25)) 
+
+terms(plans_lda, 20)
+
+topic_dist <- as.data.frame((posterior(plans_lda)[2]))
+topic_dist$doc_id <- rownames(topic_dist)
+topic_dist <- topic_dist %>%
+  select(doc_id, everything()) %>%
+  tibble()
+# 
+# topic_dist_long <- topic_dist %>%
+#   pivot_longer(!doc_id, names_to = "topic", values_to = "Topic distribution")
+# 
+# 
+# topic_12 <- topic_dist_long %>%                                     
+#   arrange(desc(`Topic distribution`)) %>% # arrange descending order
+#   group_by(topic) %>%
+#   filter(topic == 'topics.12') 
+# 
+# topic_12
+```
+
+```{r}
+# EJ LDA
+
+ej_lda <- LDA(ej_dfm,
+    k = 20,
+    method='Gibbs',
+    control=list(iter = 300, 
+                 seed = 12345, 
+                 verbose = 25)) 
+
+terms(ej_lda, 20)
+
+ej_topic_dist <- as.data.frame((posterior(ej_lda)[2]))
+ej_topic_dist$doc_id <- rownames(ej_topic_dist)
+ej_topic_dist <- ej_topic_dist %>%
+  select(doc_id, everything()) %>%
+  tibble()
+
+```
