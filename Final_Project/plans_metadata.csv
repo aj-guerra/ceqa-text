@@ -61,7 +61,6 @@ plan_id,file_name,city_name,plan_year,plan_type,plan_length,consultant_binary,co
 60,Crescent_City_2023.pdf,Crescent City,2023,HE,147,0,
 61,Cudahy_2018.pdf,Cudahy,2018,GP,194,1,MIG; Fehr and Peers; Fuscoe Engineering; Kelly Associates Management Group
 62,Cudahy_2023.pdf,Cudahy,2023,HE,275,0,
-63,Culver_City_2021.pdf,Culver City,2021,HE,123,0,
 64,Culver_City_2022.pdf,Culver City,2022,HE,123,0,
 65,Danville_2024.pdf,Danville,2024,HE,553,0,
 66,Del_Mar_2021.pdf,Del Mar,2021,HE,500,1,Kimley-Horn
@@ -236,7 +235,7 @@ plan_id,file_name,city_name,plan_year,plan_type,plan_length,consultant_binary,co
 235,Pleasanton_2023.pdf,Pleasanton,2023,HE,540,1,Lisa Wise Consulting
 236,Pomona_2021.pdf,Pomona,2021,HE,58,1,Kimley-Horn
 237,Port_Hueneme_2021.pdf,Port Hueneme,2021,GP,371,1,Rincon Consultants
-238,Port_Hueneme_2022.pdf,Port Hueneme,2022,HE,149,,
+238,Port_Hueneme_2022.pdf,Port Hueneme,2022,HE,149,0,
 239,Porterville_2007.pdf,Porterville,2007,GP,226,1,Dyett and Bhatia
 240,Porterville_2024.pdf,Porterville,2024,HE,245,1,Rincon Consultants
 241,Portola_2024.pdf,Portola,2024,GP,193,0,

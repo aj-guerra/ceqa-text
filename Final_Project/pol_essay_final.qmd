@@ -3,7 +3,7 @@ title: "The Effects of Consultant Use on Environmental Justice Planning"
 author: "Aaron Guerra"
 format: pdf
 fontsize: 12pt
-linestretch: 1.2
+linestretch: 2
 classoption: oneside
 geometry: margin=1in
 mainfont: Times New Roman
@@ -18,6 +18,9 @@ suppress-bibliography: false
 #| echo: false
 #| warning: false
 #| output: false
+
+# load packages, dictionary, data
+
 library(tidyverse)
 library(quanteda)
 library(quanteda.textstats)
@@ -25,6 +28,9 @@ library(topicmodels)
 library(tidytext)
 library(tidycensus)
 library(stargazer)
+library(betareg)
+library(broom)
+library(gt)
 
 ej_dictionary <- dictionary(list(
   identifying_disadvantaged_communities = c(
@@ -37,7 +43,7 @@ ej_dictionary <- dictionary(list(
     "household income*","median income", "MHI", "income limit*", 
     "health risk factor*", "environmental burden*", 
     "health risk*", "community needs",
-    "historical trend*", "gentrification", "displacement*", 
+    "historical trend*", 
     "fringe communit*", "unincorporated communit*", 
     "equit*", "inequit*", 
     "low-income area*", "low-income population*", "sensitive population*",
@@ -190,15 +196,21 @@ ej_dictionary <- dictionary(list(
   )
   ))
 
-plan_corpus <- readRDS("plans_corpus_doc.rds")
+plan_corpus <- readRDS("plans_corpus_doc.rds") 
 
-plan_metadata <- read_csv('../plans_metadata.csv') %>% 
+plan_metadata <- read_csv('plans_metadata.csv') %>% 
   mutate(consultant_list = str_split(consultant_name, pattern = ";\\s*"))
 
 docvars(plan_corpus) <- plan_metadata
 
-# ej_corpus <- corpus_subset(plans_corpus_doc, 
-#                            plan_type == "EJE")
+plan_corpus <- corpus_subset(plan_corpus, (plan_type == "EJE" | plan_type == "GP" | plan_type == "HE"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+# generate full document metadata
 
 ca_data <- get_acs(geography='place',
                        state='California',
@@ -230,87 +242,42 @@ docvar_df <- docvars(plan_corpus) %>%
                   include.lowest = TRUE, 
                   labels = FALSE)),
     single_consultant = str_split_i(consultant_name, ';', 1),
+    n_consultants = ifelse(is.na(consultant_name),
+                           0,
+                           str_count(consultant_name, ";") + 1)
   ) %>% 
   tibble()
+```
 
-cities <- tolower(unlist(str_split(as.character(docvars(plan_corpus)$city_name), ' ')))
-counties <- tolower(unlist(str_split(c(
-  "ALAMEDA", "ALPINE", "AMADOR", "BUTTE", "CALAVERAS", "COLUSA", "CONTRA COSTA",
-  "DEL NORTE", "EL DORADO", "FRESNO", "GLENN", "HUMBOLDT", "IMPERIAL", "INYO",
-  "KERN", "KINGS", "LAKE", "LASSEN", "LOS ANGELES", "MADERA", "MARIN", "MARIPOSA",
-  "MENDOCINO", "MERCED", "MODOC", "MONO", "MONTEREY", "NAPA", "ORANGE", "PLACER",
-  "PLUMAS", "RIVERSIDE", "SACRAMENTO", "SAN BENITO", "SAN BERNARDINO", "SAN DIEGO",
-  "SAN FRANCISCO", "SAN JOAQUIN", "SAN LUIS OBISPO", "SAN MATEO", "SANTA BARBARA",
-  "SANTA CLARA", "SANTA CRUZ", "SHASTA", "SIERRA", "SISKIYOU", "SOLANO", "SONOMA",
-  "STANISLAUS", "SUTTER", "TEHAMA", "TRINITY", "TULARE", "TUOLUMNE", "VENTURA",
-  "YOLO", "YUBA", "NEVADA"
-), ' ')))
-
-place_names_remove <- c(cities, 
-                        str_c(cities, "’s"), 
-                        counties)
-
-two_letters <- c()
-for (letter in letters) {
-  two_letters <- c(two_letters, str_c(letters, letter))
-  }
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+#| cache: true
+# generate tokens and then dfm and then final df
 
 plan_tokens <- tokens(plan_corpus) %>% 
   tokens_tolower() %>%
-  tokens_compound(ej_dictionary, 
-                  valuetype = "glob", 
-                  case_insensitive = TRUE) %>%
-  tokens_remove(place_names_remove) %>%
-  tokens_remove(stopwords("en")) %>%
-  tokens_remove(c('st', 'ave', 'rd', 'blvd'))%>%
   tokens(split_hyphens = TRUE,
          remove_punct = TRUE,
          remove_symbols = TRUE,
-         remove_numbers = TRUE) %>%
-  tokens_remove(letters) %>% 
-  tokens_remove(two_letters) 
+         remove_numbers = TRUE) 
 
-plan_dfm <- plan_tokens %>% 
-  dfm() %>% 
-  dfm_tfidf() %>%
-  dfm_trim(min_docfreq = 20,
-           docfreq_type = "count") %>%
-  dfm_subset(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE")
+ej_tokens <- plan_tokens %>% 
+  tokens_compound(ej_dictionary, 
+                  valuetype = "glob", 
+                  case_insensitive = TRUE,
+                  join=FALSE) %>% 
+  tokens_keep(ej_dictionary,
+             valuetype='glob')
+  
+ej_dfm <- ej_tokens %>% 
+  dfm() 
 
-ej_dfm <- plan_tokens %>% 
-  dfm() %>% 
-  # dfm_tfidf() %>% 
-  dfm_keep(ej_dictionary) %>% 
-  dfm_subset(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE")
+docvars(ej_dfm) <- docvar_df 
 
 ej_dfm_tfidf <- ej_dfm %>% 
   dfm_tfidf() 
-
-ej_dfm_dict <- ej_dfm %>% 
-  dfm_lookup(ej_dictionary, 
-             valuetype = "glob", 
-             case_insensitive = TRUE) %>%
-  dfm_group(group = plan_type,
-            force = TRUE)
-
-docvars(plan_dfm) <- docvar_df %>% filter(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE" )
-
-plan_dfm <- plan_dfm[rowSums(plan_dfm) > 0, ] 
-
-docvars(ej_dfm) <- docvar_df %>% filter(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE" )
-
-ej_dfm <- ej_dfm[rowSums(ej_dfm) > 0, ]
-
-# freq_tfidf <- textstat_frequency(ej_dfm_tfidf, 
-#                    force=TRUE) %>%
-#   tibble(); freq_tfidf
-# 
-# freq_by_main_consultant <- textstat_frequency(ej_dfm,
-#                    force=TRUE,
-#                    groups=single_consultant) %>%
-#   tibble() %>%
-#   group_by(group) %>%
-#   slice_max(order_by = frequency, n = 10) ; freq_by_main_consultant
 
 ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine'))) %>% 
   left_join(docvar_df, 
@@ -321,8 +288,6 @@ ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine')
          same_pop = as.factor(ifelse(pop_bin.x == pop_bin.y, 1, 0)),
          same_mhi = as.factor(ifelse(mhi_bin.x == mhi_bin.y, 1, 0)),
          both_used_consultant = as.factor(ifelse(consultant_binary.x == 1 & consultant_binary.y == 1, 1, 0)),
-         # same_consultant1 = ifelse(consultant_name.x == consultant_name.y, 1, 0),
-         # same_consultant = as.factor(ifelse(is.na(same_consultant1), 0, same_consultant1)),
          any_shared_consultant = as.factor(
            mapply(function(a, b) {
              if (is.null(a) || is.null(b) || (all(is.na(a)) & all(is.na(b)))) {
@@ -344,6 +309,7 @@ ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine')
                  length(intersect(a, b))
                  }
            }, consultant_list.x, consultant_list.y),
+         both_no_consultant = as.factor(ifelse(consultant_binary.x == 0 & consultant_binary.y == 0, 1, 0)),
          same_plan_type = as.factor(ifelse(plan_type.x == plan_type.y, 1, 0)),
          both_eje = as.factor(ifelse(plan_type.x == "EJE" & plan_type.y == "EJE", 1, 0)),
          both_gp = as.factor(ifelse(plan_type.x == "GP" & plan_type.y == "GP", 1, 0)),
@@ -353,11 +319,29 @@ ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine')
 
 ```
 
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+# are consultants writing diffrent kinds of plans?
+
+# count(docvar_df, consultant_binary, plan_type) %>% 
+#   filter(plan_type %in% c('EJE', 'GP', 'HE')) %>% 
+#   mutate(per=ifelse(consultant_binary==0,n/107,n/235))
+
+# not really
+
+```
+
 # Introduction
 
 In 2016, the state of California passed Senate Bill 1000, which required that city general plans address environmental justice (EJ). A general plan lays out the status quo and goals of a city, and is composed of different elements, including the housing element (the only element requiring state approval), safety element, land use element, and others. In implementing EJ, cities are given the option between a standalone EJ element or incorporating this material across the general plan. Previous research suggests that the implementation of EJ into plans varies greatly and that further research should seek to explain "the context in which plans were made \[...\], including the use of consultants" [@brinkley2024, pp. 68]. This article intends to do just that, by questioning what effect the use of consulting firms has on the similarity between environmental justice elements. A greater understanding of how consultants impact the policy development process can have normative implications for the policies that are developed in the EJ context, which prioritizes localized, participatory development over centralized or standardized approaches. Further, consultants are frequently used in the environmental policy process, particularly in the environmental review process, and results may indicate further avenues of research.
 
-Here, I focus on a single hypothesis regarding the use of consultants. Previous research on boilerplate text has indicated that documents sharing consulting firms have increased use of boilerplate text [@scott2022]. Further, the use of consultants is often intended to reduce friction in the review process through normalized and standardized processes [@kingsley2017]. However, the role that consultants play in the environmental policy proces, particulalry in the development of substantive local policy, is still not well understood [@scott2019; @marciano2023]. As such, I hypothesize that two documents which use the consulting firm will have increased similarity in their discussion of environmental justice than two firms which do not.
+Here, I focus on a single hypothesis regarding the use of consultants. Previous research on boilerplate text has indicated that documents sharing consulting firms have increased use of boilerplate text [@scott2022]. Further, the use of consultants is often intended to reduce friction in the review process through normalized and standardized processes [@kingsley2017]. However, the role that consultants play in the environmental policy proces, particulalry in the development of substantive local policy, is still not well understood [@scott2019; @marciano2023]. As such, I hypothesize the following:
+
+H1: Two plans which both utilized the same consultant in the planning process will have an increased cosine similarity compared to other plan-comparisons.
+
+H2: Two plans which both did not use a consultant in the planning process will have an decreased cosine similarity compared to other plan-comparisons.
 
 # Methods
 
@@ -436,120 +420,282 @@ freq_tfidf %>%
 
 ## Dependent Variable
 
-The dependent variable in this analysis is the similarity between two documents. Given the resultant DFM, cosine similarity was calculated between each pair of documents, for a total of 58,653 pairwise comparisons. Cosine similarity measures the cosine between two vectors in a high-dimensional space, where each vector is equal in length to the number of features in a DFM. Higher cosine measurements indicate higher similarity between documents. Cosine similarity
+The dependent variable in this analysis is the similarity between two documents. Given the resultant DFM, cosine similarity was calculated between each pair of documents, for a total of 58,653 pairwise comparisons. In other words, the units of analysis are the plan dyads. Cosine similarity measures the cosine between two vectors in a high-dimensional space, where each vector is equal in length to the number of features in a DFM. Higher cosine measurements indicate higher similarity between documents. Cosine similarity is frequently used to measure the difference between documents, particularly when there are many features that produce a sparse DFM.
 
 ## Independent Variables
 
-The primary independent variable of analysis is the use of consultants on a given EJ element. This was developed through a manual content analysis by the author. Use of consultant was defined as an explicit reference within the document typically labeled using the phrase "Document prepared by" or the prominent display of a consulting firm logo. The actual consulting firm was recorded but as no two EJ elements shared the same firm, the independent variable is operationalized as two elements both having used a consultant.
+The primary independent variable of analysis is the use of consultants on a given EJ element. This was developed through a manual content analysis by the author. Use of consultant was defined as an explicit reference within the document. This typically occurred in one of three places: a prominent display of a consulting firm logo in title pages, named recognition in an acknowledgements section, or a reference to the consultant buried in the text itself. Of 360 plans, 118 (33%) did not use a consultant (or did not list a consultant), 154 (43%) used a single consultant, and 88 (24%) used two or more. This analysis uses two primary independent variables that relate to the two hypotheses. First, I construct a binary dummy measuring if two plans used at least one consultant in common - it could be an exclusive match, where both plans used the same (and only the same) consultant, or it could be a partial match, where two plans used many consultants, at least one of which was the same. Second, I construct a binary dummy variable for when two plans both did not refer to any consultant in the planning process. These variables are mutually exclusive of one another but not complete - together, about 14% of the dataset is coded in one way or the other. The overwhelming majority of the dataset compares plans with and without consultants or plans with different consultants.
 
-Two sets of controls were used for this analysis. First, the thirteen plans are distributed across eight counties, meaning that several of the plans exist in the same county - there are five in Los Angeles county and two in Riverside county. As such, the county within which a city is bounded is included in some models. Similarly, the plans in this dataset were developed between 2021 and 2024, and the year of plan development is included in some models. Second, two socioeconomic variables were gathered from the 2020 American Community Survey, measuring the population and median household income (MHI) of the cities measured. These were collected from the Census API using the `tidycensus` R package. For means of comparing population and MHI, these variables were binned into two groups about the median, thereby measuring if a community is relatively large or small and poor or wealthy.
+Two groups of control variables were used for this analysis, each implemented on the comparison between two plans. First, the plans in this dataset were developed between 1998 and 2024, and it could be expected that plans written in the same year capture similar topical issues. As such, I construct a binary dummy variable for if two plans were written in the same year. Further it might be expected that socioeconomic conditions in cities dictate, in some form, what they discuss. To control for this variation, two socioeconomic variables were gathered from the 2020 American Community Survey, measuring the population and median household income (MHI) of the cities measured. These were collected from the Census API using the `tidycensus` R package. To implement these variables into the bigram comparison, I break each variable into roughly even quartiles, and construct dummy binary variables if the quartile level matches - for examples, two communities that are both in the second quartile for median household income would be considered a match. The quartiles are displayed in @tbl-popmhi.
+
+```{r}
+#| label: tbl-popmhi
+#| tbl-cap: "Population and MHI Quartiles"
+#| echo: false
+#| results: asis
+
+quants <- as.data.frame(rbind(quantile(docvar_df$population, 
+                         probs = seq(0, 1, length.out = 5), 
+                         na.rm = TRUE), 
+                quantile(docvar_df$mhi, 
+                         probs = seq(0, 1, length.out = 5), 
+                         na.rm = TRUE))) %>% 
+  mutate(rowname = c('Population', "MHI"))
+
+
+gt(quants) %>% 
+  fmt_number(decimals=0)
+```
+
+The second group of control variables address that there are multiple types of documents in this dataset, and documents of the same type would be expected to be similar to each other. In the dyad context, I construct three dummy variables to control for documents of the same sort - both Environmental Justice Elements, both General Plans, or both Housing Elements.
 
 # Results and Discussion
 
-Given the nature of the data, this analysis uses ordinary least squares regression (OLS). Initial inspection suggests that non-normal distribution of error terms is remedied by transforming the dependent variable into its natural logarithm. Four models are run: the first with only consultant use, the second with consultant use controlling for plan-level variables, the third with consultant use controlling for socioecnomic variables, and the fourth with all controls. The results of this regression analysis are presented in Table 1.
+As the dependent variable is continuous yet bounded by (0,1) and the distribution is non-normal, a beta regression model was selected to perform regression analysis. Initial inspection suggests that non-normal distribution of error terms is remedied by transforming the dependent variable into its natural logarithm. Four models are run, two for each hypothesis - for each hypothesis, the first model evaluates shared (or null) consultant use in addition to plan type, while the second model evaluates consultant use as an interaction with plan type. Note that there is no interaction between shared consultant use and EJ elements as these do not occur in the data. The results of the regression for hypothesis 1 are presented in @tbl-regression-h1.
 
-```{r }
+```{r}
+#| label: tbl-regression-h1
+#| tbl-cap: "Similarity for Shared Consultant Use"
 #| echo: false
 #| results: asis
-# 
 
-mod_1 <- glm(cosine ~  any_shared_consultant + same_year + same_pop + same_mhi + both_eje + both_gp + both_he,
-             family = quasibinomial(),
-            data = ej_sim_df) 
+mod_1a <- betareg(cosine ~  any_shared_consultant + same_year + same_pop + same_mhi + both_eje + both_gp + both_he,
+                 link='logit',
+                 data = ej_sim_df) 
 
-mod_3 <- glm(cosine ~  same_year + same_pop + same_mhi + both_eje*any_shared_consultant + both_gp*any_shared_consultant + both_he*any_shared_consultant ,
-             family = quasibinomial(),
-            data = ej_sim_df) 
+mod_1a_int <- mod_1a %>% 
+  tidy() %>% 
+  filter(component == "mean", term == "(Intercept)") %>% 
+  pull(estimate)
 
-# stargazer(mod_1, mod_3,
-#           type='text')
+mod_1a_eff <- mod_1a %>% 
+  tidy() %>% 
+  filter(component == "mean", term == "any_shared_consultant1") %>% 
+  pull(estimate)
 
+# plogis(mod_1a_int + mod_1a_eff) - plogis(mod_1a_int)
 
-stargazer(mod_1, mod_2, mod_3,
+mod_1b <- betareg(cosine ~  both_no_consultant + same_year + same_pop + same_mhi + both_eje + both_gp + both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+mod_1b_int <- mod_1b %>% 
+  tidy() %>% 
+  filter(component == "mean", term == "(Intercept)") %>% 
+  pull(estimate)
+
+mod_1b_eff <- mod_1b %>% 
+  tidy() %>% 
+  filter(component == "mean", term == "both_no_consultant1") %>% 
+  pull(estimate)
+
+# plogis(mod_1b_int + mod_1b_eff) - plogis(mod_1b_int)
+
+mod_2a <- betareg(cosine ~ same_year + same_pop + same_mhi + both_eje + any_shared_consultant*both_gp + any_shared_consultant*both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+mod_2b <- betareg(cosine ~ same_year + same_pop + same_mhi + both_no_consultant*both_eje + both_no_consultant*both_gp + both_no_consultant*both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+stargazer(mod_1a, mod_2a, 
           type='latex',
-          title='Predictors of Logged Cosine Similarity',
+          title = "",
+          label = "",
+          float=FALSE,
+          order= c('year', 'pop', 'mhi'),
+          dep.var.labels = 'Cosine Similarity',
           covariate.labels = c(
-            'Consultant Used',
-            'Same County',
             'Same Year',
             'Same Population Bin',
-            'Same MHI Bin'
+            'Same MHI Bin',
+            'Shared Consultant',
+            'Both EJE',
+            'Both GP',
+            'Both HE',
+            'Shared Consultant * Both GP',
+            'Shared Consultant * Both HE'
           ),
           column.sep.width='0pt',
           font.size='small',
           header=FALSE)
 ```
 
-In each of the four models, there is evidence that the use of consultants in the development of an EJ element is correlated with increased cosine similarity. This effect remains mostly unaffected by the inclusion of further controls, none of which significantly influence the cosine similarity. However, there is also reason to be skeptical about the models including controls, as the associated F statistic is not significant. Combined with the lack of significance for any of the control variables, the simplest first model is perhaps the most reliable. Taking the coefficient from that model, these results suggest that when two EJ elements both use a consultant in their development, the similarity between them increases by 43.6%.
+The results in @tbl-regression-h1 suggest that, all else equal, use of a shared consultant does increase similarity between two plans. While plans occurring in the same year, or with the same sociodemographic characteristics are slightly more similar than those not, plans of the same type are significantly more similar (as would be expected). This analysis suggests that housing elements are the most similar compared to other plans: 0.25 units moreso. Most importantly, in aggregate the use of a shared consultant increases plan similarity by a more humble amount, 0.03 units. This increased similarity is particularly pronounced in general plans and housing elements, which, when sharing a consultant, are about 0.05 units more similar.
 
-Given these results, one may wonder what is different about the documents produced with a consultant compared to those which were produced without. One approach to understanding these differences is through the frequency with which terms appear in the two groups. Recall that term counts have been weighted using TF-IDF scores, such that the most frequent terms are better interpreted as the most relatively frequent term (in that document). shows the most common twenty words in each group, highlighting those which appear in both.
+Results for the second hypothesis can be seen in @tbl-regression-h2. Here, the regression analysis suggests that two plans, both without consultants, are significantly less similar than other dyads. In addition to similar measures for the control variables, two plans which both do not use consultants are expected to be 0.02 units less similar, all else equal. In comparison to the first hypothesis, there is only a pronounced interaction effect with housing elements, which are expected to be slightly more dissimilar than other document types.
 
 ```{r}
-#| fig-cap: "Weighted Term Frequency in Environmental Justice Elements"
+#| label: tbl-regression-h2
+#| tbl-cap: "Similarity for No Consultant Use"
 #| echo: false
 #| results: asis
 
-freqs <- ej_dfm %>%
-  textstat_frequency(groups=used_consultant, force=TRUE) %>%
-  group_by(group) %>%
-  slice_max(order_by = frequency, n = 30) %>%
-  arrange(group, desc(frequency)) %>% 
-  mutate(group = ifelse(group == 1, "Used Consultant", "Did Not Use Consultant")) %>% 
-  ungroup()
-
-appear_in_both <- count(freqs, feature) %>% 
-  filter(n>1) %>% 
-  pull(feature)
-
-freqs <- freqs %>% 
-  mutate(appear_in_both = as.factor(ifelse(feature %in% appear_in_both, 1, 0)) )
-
-
-freqs %>%
-  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
-  geom_col(aes(fill=appear_in_both)) +
-  facet_wrap(~ group, 
-             scales = "free_y") +
-  coord_flip() +
-  labs(x = "Feature", y = "TF-IDF Weighted Frequency") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        legend.position = 'none')
+stargazer(mod_1b, mod_2b, 
+          type='latex',
+          title = "",
+          label = "",
+          float=FALSE,
+          order= c('year', 'pop', 'mhi'),
+          dep.var.labels = 'Cosine Similarity',
+          covariate.labels = c(
+            'Same Year',
+            'Same Population Bin',
+            'Same MHI Bin',
+            'Both No Consultant',
+            'Both EJE',
+            'Both GP',
+            'Both HE',
+            'Both No Consultant * Both EJE',
+            'Both No Consultant * Both GP',
+            'Both No Consultant * Both HE'
+          ),
+          column.sep.width='0pt',
+          font.size='small',
+          header=FALSE)
 ```
 
-While this sample is small, there are a few intuitive points which can be gleaned from this approach. First, there are several geographic locations which contribute to the similarity measures that should be removed as research progresses - evergreen, pomona, magnolia, and belle haven are either neighborhoods or locations which uniquely identify a certain city, and would ideally be removed. Second, there are a small number of words which appear frequently in both consulted and non-consulted plans, including RHNA, or the Regional Housing Needs Allocation, which measures the need for housing in a community, which may indicate that regardless of consultant use, this metric is used to provide for one form of environmental justice. Finally, while @brinkley2024 found that discussion of race was not frequent in EJ plans, this analysis highlights that both the terms "latinx" and "segregation" appear frequently in consulted plans. While certainly not causal, this suggests that consulted projects are perhaps more likely to include race. Further research would need to investigate this across a broader set of plans, potentially also controlling for racial or ethnic sub-populations within a city.
+Given these results, one may wonder what is different about the documents produced with a consultant compared to those which were produced without. One approach to understanding these differences is through the frequency with which terms appear in the two groups. @fig-words-used displays the ten words more commonly used by consultants and ten by non-consultants, scored according to their average relative frequency. Notably, sea level rise is used significantly more often by consultants, although this may be due to geographic variation in where consultants are used. Drawing inferences from a snapshot is difficult, but one could suggest that consultant-frequent terms are more in line with climate change, with a somewhat academic tone (adaptation, resilience, green infrastructure), and that non-consultant-frequent terms are more related to food more tied to lived experience than academic expertise. This may be understood in that consultants are often brought on specifically for their technical expertise, and may be more prone to using vocabulary which reflects technical, rather than experiential, observations.
+
+```{r}
+#| label: fig-words-used
+#| fig-cap: "EJ Terms used more by Consultants and Non-Consultants"
+#| echo: false
+#| results: asis
+
+noncon_words <- textstat_frequency(ej_dfm_tfidf,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==0) %>%
+  filter(frequency > 10) %>% 
+  filter(docfreq > 10) %>% 
+  mutate(freq_std = frequency/docfreq) %>% 
+  tibble()
+
+con_words <- textstat_frequency(ej_dfm_tfidf,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==1) %>%
+  filter(frequency > 10) %>% 
+  filter(docfreq > 23) %>% 
+  mutate(freq_std = frequency/docfreq) %>% 
+  tibble()
+
+words_used <- inner_join(noncon_words, con_words, by = "feature") %>% 
+  mutate(diff = freq_std.x-freq_std.y) %>% 
+  arrange(diff) %>% 
+  select(feature, freq_std.x, freq_std.y, diff) 
+
+words_h10 <- words_used %>% 
+  head(10)
+
+words_t10 <- words_used %>% 
+  tail(10)
+
+rbind(words_h10, words_t10) %>% 
+  mutate(`Used More By` = ifelse(diff > 0, "Non-Consultants", "Consultants")) %>%
+  ggplot(aes(x = reorder(feature, diff), y = diff)) +
+  geom_col(aes(fill=`Used More By`)) +
+  coord_flip() +
+  labs(x = "Term", y = "Difference in Relative Frequency") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+A similar figure can be plotted aggregating the words to the themes they fall under. @fig-themes-used depicts this, showing the aggregate relative frequency for consultant and non-consultant documents. In every thematic category, consultants come out ahead[^4]. There are multiple possible explanations for this - for one, plans written by consultants discuss environmental justice topics at a greater rate than those not written by consultants, or perhaps, they use terms related to environmental justice at a greater rate. This would be relatively compatible with the regression results above, suggesting that consultant-written plans, writ large, are discussing environmental justice topics more similarly and more in general, than non-consultant-written plans.
+
+[^4]: This result is robust to non-weighted counts as well as non-averaged counts.
+
+```{r}
+#| label: fig-themes-used
+#| fig-cap: "EJ Themes used more by Consultants and Non-Consultants"
+#| echo: false
+#| results: asis
+
+
+ej_dfm_dict <- ej_dfm_tfidf %>% 
+  dfm_lookup(ej_dictionary, 
+             valuetype = "glob", 
+             case_insensitive = TRUE) 
+
+noncon_agg <- textstat_frequency(ej_dfm_dict,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==0) %>%
+  mutate(freq_std = frequency/docfreq) %>% 
+  tibble()
+
+con_agg <- textstat_frequency(ej_dfm_dict,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==1) %>%
+  mutate(freq_std = frequency/docfreq) %>% 
+  tibble()
+
+inner_join(noncon_agg, con_agg, by = "feature", suffix = c(".noncon", ".con")) %>%
+  select(feature, freq_std.noncon, freq_std.con) %>%
+  pivot_longer(
+    cols = starts_with("freq_std"),
+    names_to = "Group",
+    values_to = "freq_std"
+  ) %>%
+  mutate(Group = recode(Group,
+                       "freq_std.noncon" = "Non-Consultants",
+                       "freq_std.con" = "Consultants")) %>%
+  ggplot(aes(x = reorder(feature, freq_std), y = freq_std, fill = Group)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  labs(x = "Term", y = "Relative Frequency", fill = "Group") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+```
+
+However, an alternate explanation considers the data generating process more closely. Recall that the list of environmental justice terms used to subset the corpus in this analysis was drawn from state-level guidelines on developing EJ plans. Environmental justice is a large idea with its roots in community-led activism and and has always been greater than the academic discussion or (more recent) government implementation. As such, one potential explanation is that consultants draw more heavily on state-approved ideas surrounding environmental justice, particularly in the words and phrases that they use most often to discuss the idea. In this explanation, plans written by non-consultants do not address EJ less, but differently, using vocabulary which is not as explicitly drawn from state planning recommendations.
 
 # Conclusion
 
-This research has made initial progress towards an understanding of how novel topics of planning emerge. I show that two planning elements which are both written by consultants are significantly more likely to be similar than other pairwise comparisons. In this analysis, I make best efforts to limit the corpuses being compared such that they highlight substantively unique features, rather than local details or generic, frequently used terms. However, there are two directions of further effort towards a greater understanding of the role of consultants on planning documents.
+This research has made solid progress towards an understanding of how novel topics emerge within city plans. More broadly, it advances evidence that environmental consultants play a significant role in the policy process, and are able to make significant differences to plans. I show that the discussion of environmental justice within two planning documents which are both written by the same consultant are significantly more likely to be similar than other dyads, as well as the negation - that planning documents not written by consultants are likely to be less similar than other dyads. Together, these regression analyses highlight that consultants play a meaningful role in what plans discuss. While it is certainly notable that there is empirical evidence suggesting consultants contribute to the discussion of environmental justice, there is still an underdeveloped understanding of that process. While I highlight a correlation between consultant use and similarity, and suggest some of the terms that may be unique to consultants, there is no proper understanding of what consultants are actually doing differently.
 
-First, this research could be performed in greater depth. Here I highlight a correlation between consultant use and similarity, and suggest some of the terms that may be unique to consultants, but there is no proper understanding of what consultants are actually doing differently. Developing hypotheses based on the literature about how consultants act, what tasks they are assigned, and how the complete these would provide one step in this direction. This hypotheses could be tested by moving from term-based models of documents to topic-based models, where semantic meaning is measured rather than the frequency or similarity of various terms. Such an approach would likely require a more atomic view of each document to compare if, when, and where various topics are discussed.
+Further research, on this project or others, should develop hypotheses based on the literature about how consultants act, what tasks they are assigned, and how the complete these would provide one step in this direction. This hypotheses could be tested by moving from term-based models of documents to topic-based models, where semantic meaning is measured rather than the frequency or similarity of various terms. Such an approach would likely require a more atomic view of each document to compare if, when, and where various topics are discussed.
 
-Second, this research could be conducted with greater breadth. Here, the sample reflects a best initial effort at the universe of environmental justice elements, but there EJ elements which are buried within general plans not analyzed here, as well as potential documents not included in the dataset used. Further, cities have the option of developing a standalone EJ element or integrating the necessary materiel within other elements. Afforementioned topic-based models may be similarly useful to parse out where and how city planning documents more broadly discuss EJ and allow for comparison between documents where there is a greater expectation of dissimilarity. Further, a broader dataset would likely include plans which use the same consultant, allowing for an additional level of control in the models.
+\newpage
 
 # Appendix
 
 ```{r}
 #| echo: false
+#| results: asis
 
 keys <- names(ej_dictionary)
  
+key_tables <- list()
 
-key_table <- data.frame(keys=character(), 
-                        terms=character())
+key_table  <- data.frame(key=character(),
+                         terms=character())
   
 for (key in keys){
   terms <- ej_dictionary[[key]]
-  terms_for_table <- paste(terms, collapse=', ')
-  kt <- data.frame(keys=key,
-                   terms=terms_for_table)
-  key_table <- rbind(key_table, kt)
-  
+  kt <- data.frame(key=key,
+                   terms=terms)
+  key_tables[[key]] <- rbind(key_table, kt)
 }
 
-key_table %>% 
-  gt() 
+key_tables[[1]]%>% gt()
+head(key_tables[[2]], 41) %>% gt()
+tail(key_tables[[2]], 41) %>% gt()
+key_tables[[3]]%>% gt()
+key_tables[[5]]%>% gt()
+head(key_tables[[6]], 32) %>% gt()
+tail(key_tables[[6]], 32) %>% gt()
+key_tables[[7]]%>% gt()
+key_tables[[8]]%>% gt()
 
 ```
+
+\newpage
 
 # Works Cited
