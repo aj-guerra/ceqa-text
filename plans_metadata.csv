@@ -1,0 +1,362 @@
+plan_id,file_name,city_name,plan_year,plan_type,plan_length,consultant_binary,consultant_name
+1,Adelanto_2024.pdf,Adelanto,2024,HE,329,0,
+2,Agoura_Hills_2022.pdf,Agoura Hills,2022,HE,257,1,Karen Warner Associates
+3,Alameda_2022.pdf,Alameda,2022,GP,382,1,Cultivate; Herring and Associates
+4,Alhambra_2019.pdf,Alhambra,2019,GP,112,1,Rincon Consultants; RRM Design Group; Veronica Tam and Associates; KOA Corporation; Natelson Dale Group; True North Research
+5,Alhambra_2024.pdf,Alhambra,2024,GP,29,1,Rincon Consultants; RRM Design Group; Veronica Tam and Associates; KOA Corporation; Natelson Dale Group; True North Research
+6,Alturas_2019.pdf,Alturas,2019,HE,104,0,
+7,American_Canyon_2023.pdf,American Canyon,2023,HE,363,0,
+8,Anderson_2007.pdf,Anderson,2007,GP,184,0,
+9,Anderson_2019.pdf,Anderson,2019,HE,127,1,Placeworks
+10,Angels_City_2019.pdf,Angels City,2019,HE,172,1,Unknown
+11,Antioch_2023.pdf,Antioch,2023,EJE,584,1,Urban Planning Partners
+12,Arcata_2019.pdf,Arcata,2019,HE,34,0,
+13,Arvin_2018.pdf,Arvin,2018,HE,186,0,
+14,Arvin_2023.pdf,Arvin,2023,EJE,26,0,
+15,Azusa_2021.pdf,Azusa,2021,HE,255,1,MIG
+16,Banning_2021.pdf,Banning,2021,HE,257,1,Rincon Consultants
+17,Barstow_2021.pdf,Barstow,2021,SE,49,0,
+18,Beaumont_2020.pdf,Beaumont,2020,GP,417,1,Raimi and Associates; Fehr and Peers; Alber A. Webb Associates; Lisa Wise Consulting; Rincon Consultants
+19,Bell_2018.pdf,Bell,2018,GP,254,1,Unknown
+20,Bell_Gardens_2022.pdf,Bell Gardens,2022,HE,240,0,
+21,Benicia_2023.pdf,Benicia,2023,CHSE,778,1,Placeworks
+22,Berkeley_2023.pdf,Berkeley,2023,HE,670,1,Raimi and Associates
+23,Big_Bear_Lake_2022.pdf,Big Bear Lake,2022,HE,145,0,
+24,Bishop_2021.pdf,Bishop,2021,HE,105,1,Unknown
+25,Bradbury_2021.pdf,Bradbury,2021,HE,194,1,Veronica Tam and Associates
+26,Brawley_2008.pdf,Brawley,2008,GP,328,1,ICF Jones and Stokes
+27,Brea_2021.pdf,Brea,2021,HE,392,1,Karen Warner Associates
+28,Brentwood_2023.pdf,Brentwood,2023,HE,673,1,Kimley-Horn
+29,Brisbane_2021.pdf,Brisbane,2021,HE,679,0,
+30,Buellton_2023.pdf,Buellton,2023,HE,188,1,Civic Solutions; Veronica Tam and Associates; Draw Tap GIS
+31,Buena_Park_2022.pdf,Buena Park,2022,HE,293,1,RRM Design Group; Veronica Tam and Associates; Morse Planning Group
+32,Burlingame_2023.pdf,Burlingame,2023,HE,148,0,
+33,Camarillo_2022.pdf,Camarillo,2022,HE,577,1,Rincon Consultants
+34,Campbell_2023.pdf,Campbell,2023,GP,309,1,De Novo Planning Group; Saxelby Acoustics; Fehr and Peers; M-Group; Lynx Technologies; Karen Warner Associates
+35,Canyon_Lake_2020.pdf,Canyon Lake,2020,HE,188,1,Castaneda and Associates
+36,Canyon_Lake_2022.pdf,Canyon Lake,2022,HE,226,0,
+37,Carlsbad_2021.pdf,Carlsbad,2021,HE,408,0,
+38,Carmel_By_The_Sea_2009.pdf,Carmel By The Sea,2009,ESE,114,0,
+39,Carmel_By_The_Sea_2024.pdf,Carmel By The Sea,2024,HE,468,1,EMC Planning Group
+40,Carson_2023.pdf,Carson,2023,GP,295,1,Dyett and Bhatia; Environmental Science Associates; Fehr and Peers
+41,Castro_Valley_2012.pdf,Castro Valley,2012,GP,331,1,Kahn and Mortimer and Associates; Dyett and Bhatia; Dowling Associates; Economic and Planning Systems; Environmental Science Associates; Charles M. Salter Associates
+42,Cathedral_City_2021.pdf,Cathedral City,2021,GP,648,1,Terra Nova Planning and Research
+43,Ceres_2018.pdf,Ceres,2018,GP,351,1,Dyett and Bhatia; Economic and Planning Systems; West Yost Associates; Fehr and Peers
+44,Chico_2022.pdf,Chico,2022,HE,461,0,
+45,Chula_Vista_2021.pdf,Chula Vista,2021,HE,453,1,Veronica Tam and Associates
+46,Claremont_2024.pdf,Claremont,2024,HE,349,1,Unknown
+47,Clearlake_2017.pdf,Clearlake,2017,GP,219,1,Price Consulting Services; Economic and Planning Systems; Omni-Means Transportation Engineering; J.C. Brennan and Associates; Air Permitting Specialists
+48,Clearlake_2019.pdf,Clearlake,2019,HE,362,1,Price Consulting Services
+49,Cloverdale_2023.pdf,Cloverdale,2023,HE,78,1,Unknown
+50,Clovis_2024.pdf,Clovis,2024,HE,489,0,
+51,Colma_2021.pdf,Colma,2021,GP,277,1,CSG Consultants; CSDA Design Group; Kittelson and Associates; Placeworks
+52,Commerce_2008.pdf,Commerce,2008,GP,224,0,
+53,Compton_2014.pdf,Compton,2014,GP,313,1,Blodgett Baylosis Environmental Planning
+54,Concord_2012.pdf,Concord,2012,HE,212,0,
+55,Concord_2023.pdf,Concord,2023,HE,1107,1,Rincon Consultants; Dudek
+56,Corona_2020.pdf,Corona,2020,GP,336,1,Placeworks; Fehr and Peers; Fuscoe; SWCA; LSA
+57,Corte_Madera_2023.pdf,Corte Madera,2023,HE,501,1,O'Rourke and Associates; Plan to Place; Lisa Wise Consulting
+58,Costa_Mesa_2022.pdf,Costa Mesa,2022,HE,1161,1,Kimley-Horn
+59,Cotati_2023.pdf,Cotati,2023,HE,83,1,Unknown
+60,Crescent_City_2023.pdf,Crescent City,2023,HE,147,0,
+61,Cudahy_2018.pdf,Cudahy,2018,GP,194,1,MIG; Fehr and Peers; Fuscoe Engineering; Kelly Associates Management Group
+62,Cudahy_2023.pdf,Cudahy,2023,HE,275,0,
+63,Culver_City_2021.pdf,Culver City,2021,HE,123,0,
+64,Culver_City_2022.pdf,Culver City,2022,HE,123,0,
+65,Danville_2024.pdf,Danville,2024,HE,553,0,
+66,Del_Mar_2021.pdf,Del Mar,2021,HE,500,1,Kimley-Horn
+67,Desert_Hot_Springs_2020.pdf,Desert Hot Springs,2020,GP,336,1,MIG; Gandini Group; Stanley R. Hoffman Associates
+68,Desert_Hot_Springs_2023.pdf,Desert Hot Springs,2023,HE,245,1,Castaneda and Associates
+69,Diamond_Bar_2019.pdf,Diamond Bar,2019,GP,312,1,Dyett and Bhatia; Fehr and Peers; Arellano Associates; ESA; Urban Field Studio; Pro Forma Advisors; TKE Engineering
+70,Diamond_Bar_2022.pdf,Diamond Bar,2022,HE,229,0,
+71,Dixon_2021.pdf,Dixon,2021,GP,166,1,Dyett and Bhatia; DKS; Charles Salter Associates; West Yost Associates
+72,Dos_Palos_2015.pdf,Dos Palos,2015,HE,106,0,
+73,Duarte_2021.pdf,Duarte,2021,SE,38,0,
+74,Duarte_2022.pdf,Duarte,2022,HE,264,1,Karen Warner Associates
+75,Dublin_2023.pdf,Dublin,2023,HE,654,1,Unknown
+76,East_Palo_Alto_2016.pdf,East Palo Alto,2016,LUE,194,0,
+77,El_Cajon_2021.pdf,El Cajon,2021,SE,65,1,Dudek
+78,El_Cajon_2022.pdf,El Cajon,2022,HE,226,0,
+79,El_Centro_2021.pdf,El Centro,2021,GP,359,1,CityPlace Planning; Chen Ryan Associates; Spurlock Landscape Architects
+80,El_Monte_2011.pdf,El Monte,2011,GP,449,1,The Planning Center; Amigos de Los Rios; Keyser Marston Associates; The Mobility Group; Transportation and Land Use Collective
+81,Elk_Grove_2015.pdf,Elk Grove,2015,CE,218,0,
+82,Elk_Grove_2021.pdf,Elk Grove,2021,GP,620,1,Economic and Planning Services
+83,Elk_Grove_2023.pdf,Elk Grove,2023,GP,687,1,Economic and Planning Services
+84,Emeryville_2022.pdf,Emeryville,2022,HE,358,1,Placeworks
+85,Escalon_2019.pdf,Escalon,2019,GP,276,1,Quad Knopf; De Novo Planning Group
+86,Escondido_2021.pdf,Escondido,2021,HE,291,0,
+87,Eureka_2018.pdf,Eureka,2018,GP,115,1,ESA; BAE Urban Economics; W-Trans; SHN Engineers and Geologists
+88,Fairfax_2012.pdf,Fairfax,2012,GP,526,1,LAK Associates; Crane Transportation Group; Illingworth and Rodkin; Paula Schulz
+89,Fairfax_2023.pdf,Fairfax,2023,HE,501,1,Dyett and Bhatia
+90,Fairfield_2023.pdf,Fairfield,2023,HE,602,1,Dyett and Bhatia
+91,Folsom_2021.pdf,Folsom,2021,HE,273,1,Ascent
+92,Fontana_2018.pdf,Fontana,2018,GP,964,1,Stantec; Sargent Town Planning; Lisa Wise Consulting; Raimi and Associates; Kosmont Companies; Katherine Padilla and Associates
+93,Fort_Jones_2024.pdf,Fort Jones,2024,HE,148,1,Placeworks
+94,Fountain_Valley_2022.pdf,Fountain Valley,2022,HE,172,0,
+95,Fresno_2017.pdf,Fresno,2017,HE,325,0,
+96,Galt_2016.pdf,Galt,2016,HE,54,0,
+97,Galt_2022.pdf,Galt,2022,HE,35,0,
+98,Garden_Grove_2021.pdf,Garden Grove,2021,HE,431,0,
+99,Gardena_2022.pdf,Gardena,2022,EJE,110,0,
+100,Gardena_2023.pdf,Gardena,2023,HE,325,0,
+101,Gilroy_2020.pdf,Gilroy,2020,GP,231,1,Unknown
+102,Gilroy_2023.pdf,Gilroy,2023,HE,375,1,Unknown
+103,Glendale_2023.pdf,Glendale,2023,HE,1025,1,De Novo Planning Group
+104,Glendora_2003.pdf,Glendora,2003,GP,235,0,
+105,Glendora_2022.pdf,Glendora,2022,HE,213,0,
+106,Grover_Beach_2010.pdf,Grover Beach,2010,LUE,85,0,
+107,Grover_Beach_2012.pdf,Grover Beach,2012,LUE,87,0,
+108,Grover_Beach_2020.pdf,Grover Beach,2020,HE,156,1,Placeworks
+109,Guadalupe_2022.pdf,Guadalupe,2022,GP,334,1,EMC Planning Group
+110,Hanford_2017.pdf,Hanford,2017,GP,131,1,Quad Knopf
+111,Hawthorne_2022.pdf,Hawthorne,2022,GP,464,1,De Novo Planning Group
+112,Hayward_2023.pdf,Hayward,2023,HE,96,1,Rincon Consultants
+113,Healdsburg_2023.pdf,Healdsburg,2023,HE,100,1,Unknown
+114,Hemet_2012.pdf,Hemet,2012,GP,480,0,
+115,Hemet_2021.pdf,Hemet,2021,HE,354,0,
+116,Hesperia_2023.pdf,Hesperia,2023,HE,193,1,Michael Baker International
+117,Hidden_Hills_2022.pdf,Hidden Hills,2022,HE,127,0,
+118,Highland_2021.pdf,Highland,2021,HE,427,0,
+119,Hillsborough_2023.pdf,Hillsborough,2023,HE,563,1,Houseal Lavigne; Kimley-Horn
+120,Holtville_2021.pdf,Holtville,2021,HE,196,1,The Holt Group
+121,Huntington_Beach_2017.pdf,Huntington Beach,2017,GP,280,1,Michael Baker International; Atkins Global; Moffatt and Nichol; Stantec; Stanley R. Hoffman Associates; Matrix Consulting Group
+122,Huntington_Park_2016.pdf,Huntington Park,2016,GP,277,0,
+123,Huron_2024.pdf,Huron,2024,HE,228,1,Placeworks
+124,Imperial_Beach_2022.pdf,Imperial Beach,2022,HE,166,0,
+125,Indian_Wells_2024.pdf,Indian Wells,2024,HE,246,1,De Novo Planning Group
+126,Indio_2019.pdf,Indio,2019,GP,267,1,Raimi and Associates; Rincon Consultants; Sargent Town Planning; Fehr and Peers; MR+E
+127,Inglewood_2020.pdf,Inglewood,2020,EJE,51,1,Civic Solutions; T&T Public Relations; Document All Stars
+128,Inglewood_2023.pdf,Inglewood,2023,HE,394,1,The Arroyo Group; Stanley R. Hoffman Associates; Impact Sciences
+129,Irvine_2022.pdf,Irvine,2022,HE,1953,0,
+130,Irwindale_2008.pdf,Irwindale,2008,GP,217,0,
+131,Isleton_2020.pdf,Isleton,2020,GP,31,0,
+132,King_City_1998.pdf,King City,1998,HE,344,1,Perspective Planning of San Luis Obispo; PRA Group; Higgins and Associates
+133,Kingsburg_2024.pdf,Kingsburg,2024,HE,230,1,Placeworks
+134,La_Habra_2023.pdf,La Habra,2023,HE,199,0,
+135,La_Mirada_2024.pdf,La Mirada,2024,HE,76,1,Veronica Tam and Associates; Blodgett Baylosis Environmental Planning
+136,La_Puente_2022.pdf,La Puente,2022,HE,195,1,RRM Design Group; Veronica Tam and Associates; Morse Planning Group
+137,La_Verne_2022.pdf,La Verne,2022,HE,284,1,De Novo Planning Group
+138,Laguna_Hills_2024.pdf,Laguna Hills,2024,HE,308,0,
+139,Lake_Elsinore_2022.pdf,Lake Elsinore,2022,HE,211,1,MIG
+140,Lake_Forest_2020.pdf,Lake Forest,2020,GP,106,1,De Novo Planning Group; Kittelson and Associates; Economic and Planning Systems; SWA Group; Cogstone Resource Management; West Yost Associates; Saxelby Acoustics
+141,Lake_Forest_2022.pdf,Lake Forest,2022,SE,69,1,De Novo Planning Group
+142,Lakewood_2022.pdf,Lakewood,2022,HE,267,0,
+143,Lancaster_2022.pdf,Lancaster,2022,GP,344,1,Atlas Planning Solutions; MIG
+144,Larkspur_2024.pdf,Larkspur,2024,GP,838,1,Leonard Charles and Associates; Parisi Transportation Consultants; Illingworth and Rodkin; Digital Mapping Solutions
+145,Lathrop_2019.pdf,Lathrop,2019,HE,172,1,De Novo Planning Group
+146,Lathrop_2022.pdf,Lathrop,2022,GP,313,1,De Novo Planning Group
+147,Lawndale_2023.pdf,Lawndale,2023,GP,588,1,De Novo Planning Group; Kittelson and Associates; Economic and Planning Systems; Duke Cultural Resources Management; West Yost Associates; MD Acoustics
+148,Lemon_Grove_2023.pdf,Lemon Grove,2023,HE,190,0,
+149,Lemoore_2024.pdf,Lemoore,2024,HE,767,1,Realty Planners Group
+150,Lindsay_2019.pdf,Lindsay,2019,HE,124,0,
+151,Livermore_2023.pdf,Livermore,2023,HE,342,1,Placeworks
+152,Lodi_2024.pdf,Lodi,2024,HE,352,1,Mintier Harnish
+153,Loma_Linda_2022.pdf,Loma Linda,2022,HE,138,0,
+154,Lompoc_2023.pdf,Lompoc,2023,HE,372,1,Mintier Harnish
+155,Long_Beach_2014.pdf,Long Beach,2014,HE,189,0,
+156,Long_Beach_2019.pdf,Long Beach,2019,GP,305,1,Long Beach Development Services; MIG; Cityworks Design
+157,Long_Beach_2022.pdf,Long Beach,2022,HE,120,1,Long Beach Development Services; Lisa Wise Consulting; Veronica Tam and Associates; The Robert Group; RRM Design Group
+158,Long_Beach_2023.pdf,Long Beach,2023,NE,100,1,Long Beach Development Services; RRM Design Group; LSA Associates
+159,Loomis_2024.pdf,Loomis,2024,GP,350,0,
+160,Los_Banos_2009.pdf,Los Banos,2009,GP,196,0,
+161,Los_Gatos_2022.pdf,Los Gatos,2022,GP,195,1,Mintier Harnish; Rincon Consultants; Fehr and Peers; Applied Development Economics; WRT; Urban Green
+162,Los_Gatos_2024.pdf,Los Gatos,2024,HE,783,1,Veronica Tam and Associates; EMC Planning Group; Root Policy Research
+163,Loyalton_2021.pdf,Loyalton,2021,HE,158,1,Price Consulting Services
+164,Lynwood_2023.pdf,Lynwood,2023,EJE,167,1,Infrastructure Engineers
+165,Lynwood_2024.pdf,Lynwood,2024,HE,390,1,Infrastructure Engineers
+166,Madera_2009.pdf,Madera,2009,GP,586,1,PMC
+167,Madera_2015.pdf,Madera,2015,HE,211,0,
+168,Malibu_2024.pdf,Malibu,2024,HE,426,1,Rincon Consultants
+169,Manteca_2024.pdf,Manteca,2024,GP,287,1,De Novo Planning Group
+170,Maricopa_2020.pdf,Maricopa,2020,HE,168,0,
+171,Marina_2023.pdf,Marina,2023,HE,233,1,Rincon Consultants
+172,Martinez_2023.pdf,Martinez,2023,HE,380,1,De Novo Planning Group
+173,Marysville_2021.pdf,Marysville,2021,HE,194,1,Placeworks
+174,Maywood_2022.pdf,Maywood,2022,LUE,159,0,
+175,Maywood_2023.pdf,Maywood,2023,GP,51,0,
+176,Maywood_2024.pdf,Maywood,2024,EJE,41,0,
+177,Menifee_2022.pdf,Menifee,2022,HE,594,0,
+178,Menlo_Park_2023.pdf,Menlo Park,2023,HE,1403,1,M-Group; Karen Warner Associates; Environmental Science Associates; BAE Urban Economics; Hexagon Transportation Consultants
+179,Menlo_Park_2024.pdf,Menlo Park,2024,EJE,386,1,M-Group; Environmental Science Associates; Climate Resilient Communities; ChangeLab Solutions
+180,Millbrae_2022.pdf,Millbrae,2022,GP,131,1,Mintier Harnish; WRT; Rincon Consultants; Kittelson and Associates; West Yost Associates; Applied Development Economics; Bottomley Design; Urban Green; Ascent Environmental; Time Advertising
+181,Millbrae_2024.pdf,Millbrae,2024,HE,1016,1,Harris and Associates
+182,Milpitas_2021.pdf,Milpitas,2021,GP,273,1,De Novo Planning Group
+183,Milpitas_2023.pdf,Milpitas,2023,HE,95,1,Raimi and Associates; Veronica Tam and Associates; Lawyers' Committee for Civil Rights Under Law; Rincon Consultants
+184,Monrovia_2022.pdf,Monrovia,2022,EJE,328,0,
+185,Montclair_2023.pdf,Montclair,2023,HE,319,1,National Community Renaissance; Rangwala Associates; Rincon Consultants; Houseal Lavigne
+186,Montebello_2022.pdf,Montebello,2022,HE,148,1,Rangwala Associates; Moule and Polyzoides; Rincon Consultants; Pro Forma Advisors; Urban3; Kittelson and Associates; MetroQuest
+187,Monterey_Park_2023.pdf,Monterey Park,2023,HE,310,1,Unknown
+188,Moorpark_2023.pdf,Moorpark,2023,GP,556,1,Placeworks; Iteris; Fuscoe Engineering; ECORP
+189,Moreno_Valley_2021.pdf,Moreno Valley,2021,GP,184,1,Dyett and Bhatia; Fehr and Peers; Keyser Marston Associates; Urban Field Studio; RECON Environmental; VMA Communications; TKE Engineering
+190,Moreno_Valley_2022.pdf,Moreno Valley,2022,HE,574,1,Dyett and Bhatia
+191,Morro_Bay_2020.pdf,Morro Bay,2020,HE,157,0,
+192,Morro_Bay_2021.pdf,Morro Bay,2021,GP,386,1,Michael Baker International; Placeworks; Rincon Consultants; Moffatt and Nichol; Central Coast Transportation Consulting; Miller Planning Associates
+193,Murrieta_2020.pdf,Murrieta,2020,GP,458,0,
+194,Murrieta_2021.pdf,Murrieta,2021,HE,429,0,
+195,Napa_2022.pdf,Napa,2022,GP,314,1,Dyett and Bhatia; DKS Associates; Economic and Planning Systems; ICF; Page and Turnbull; West Yost Associates
+196,Napa_2023.pdf,Napa,2023,HE,548,1,Dynamic Planning and Science; Mintier Harnish
+197,National_City_2011.pdf,National City,2011,GP,405,1,Unknown
+198,National_City_2021.pdf,National City,2021,HE,266,1,Unknown
+199,Needles_2021.pdf,Needles,2021,HE,122,1,Michael Baker International
+200,Nevada_City_2019.pdf,Nevada City,2019,HE,242,0,
+201,Nevada_City_2020.pdf,Nevada City,2020,GP,92,0,
+202,Newark_2023.pdf,Newark,2023,HE,409,1,BAE Urban Economics; Community Planning Collaborative
+203,Newport_Beach_2022.pdf,Newport Beach,2022,HE,379,1,Kimley-Horn; Kearns and West
+204,Norwalk_2023.pdf,Norwalk,2023,HE,290,0,
+205,Oakland_1998.pdf,Oakland,1998,GP,256,0,
+206,Oakland_2023.pdf,Oakland,2023,EJE,263,1,Dyett and Bhatia; E/J Solutions; PolicyLink
+207,Oakley_2022.pdf,Oakley,2022,GP,286,1,De Novo Planning Group
+208,Oakley_2023.pdf,Oakley,2023,HE,388,1,De Novo Planning Group
+209,Ontario_2022.pdf,Ontario,2022,HE,434,1,Placeworks
+210,Orange_2022.pdf,Orange,2022,HE,349,0,
+211,Orinda_2023.pdf,Orinda,2023,HE,244,1,Placeworks
+212,Orland_2024.pdf,Orland,2024,HE,205,1,Unknown
+213,Oroville_2023.pdf,Oroville,2023,HE,296,0,
+214,Oxnard_2016.pdf,Oxnard,2016,GP,196,0,
+215,Pacifica_2022.pdf,Pacifica,2022,GP,311,1,Dyett and Bhatia; DKS Associates; Economic and Planning Systems; ESA; Charles M. Salter Associates
+216,Palm_Springs_2023.pdf,Palm Springs,2023,HE,247,1,Placeworks
+217,Palmdale_2021.pdf,Palmdale,2021,HE,200,0,
+218,Palmdale_2022.pdf,Palmdale,2022,GP,975,1,Raimi and Associates; Rincon Consultants; Nelson Nygaard; HR&A Advisors; Veronica Tam and Associates; Arellano Associates; Parsons
+219,Palo_Alto_2024.pdf,Palo Alto,2024,HE,332,1,Unknown
+220,Paramount_2022.pdf,Paramount,2022,HE,149,1,MIG
+221,Pasadena_2015.pdf,Pasadena,2015,ME,81,1,Unknown
+222,Pasadena_2023.pdf,Pasadena,2023,HE,336,1,MIG
+223,Paso_Robles_2020.pdf,Paso Robles,2020,HE,118,0,
+224,Patterson_2014.pdf,Patterson,2014,GP,166,0,
+225,Perris_2022.pdf,Perris,2022,EJE,381,1,National Community Renaissance
+226,Petaluma_2023.pdf,Petaluma,2023,HE,351,1,Veronica Tam and Associates; Strategic Economics
+227,Pico_Rivera_2024.pdf,Pico Rivera,2024,HE,299,0,
+228,Piedmont_2023.pdf,Piedmont,2023,HE,532,1,Lisa Wise Consulting; Plan to Place
+229,Pinole_2010.pdf,Pinole,2010,GP,277,0,
+230,Pinole_2023.pdf,Pinole,2023,HE,346,1,Michael Baker International; Veronica Tam and Associates
+231,Pittsburg_2024.pdf,Pittsburg,2024,GP,235,1,De Novo Planning Group; TJKM Transportation Consultants; Saxelby Acoustics
+232,Placentia_2014.pdf,Placentia,2014,GP,365,0,
+233,Placentia_2021.pdf,Placentia,2021,HE,291,0,
+234,Pleasant_Hill_2023.pdf,Pleasant Hill,2023,GP,231,1,Mintier Harnish; WRT; Fehr and Peers; Rincon; Applied Development Economics
+235,Pleasanton_2023.pdf,Pleasanton,2023,HE,540,1,Lisa Wise Consulting
+236,Pomona_2021.pdf,Pomona,2021,HE,58,1,Kimley-Horn
+237,Port_Hueneme_2021.pdf,Port Hueneme,2021,GP,371,1,Rincon Consultants
+238,Port_Hueneme_2022.pdf,Port Hueneme,2022,HE,149,,
+239,Porterville_2007.pdf,Porterville,2007,GP,226,1,Dyett and Bhatia
+240,Porterville_2024.pdf,Porterville,2024,HE,245,1,Rincon Consultants
+241,Portola_2024.pdf,Portola,2024,GP,193,0,
+242,Rancho_Cucamonga_2021.pdf,Rancho Cucamonga,2021,HE,214,0,
+243,Rancho_Palos_Verdes_2018.pdf,Rancho Palos Verdes,2018,GP,244,0,
+244,Rancho_Palos_Verdes_2022.pdf,Rancho Palos Verdes,2022,HE,550,1,Veronica Tam and Associates
+245,Rancho_Santa_Margarita_2020.pdf,Rancho Santa Margarita,2020,GP,157,0,
+246,Redding_2024.pdf,Redding,2024,GP,365,0,
+247,Redlands_2022.pdf,Redlands,2022,HE,348,1,Michael Baker International
+248,Redondo_Beach_2022.pdf,Redondo Beach,2022,HE,223,1,Veronica Tam and Associates
+249,Redwood_City_2023.pdf,Redwood City,2023,HE,501,1,Unknown
+250,Reedley_2024.pdf,Reedley,2024,HE,230,1,Placeworks
+251,Rialto_2021.pdf,Rialto,2021,HE,710,0,
+252,Rialto_2023.pdf,Rialto,2023,EJE,233,0,
+253,Richmond_2012.pdf,Richmond,2012,GP,576,0,
+254,Rio_Dell_2020.pdf,Rio Dell,2020,HE,76,1,Placeworks
+255,Rio_Vista_2023.pdf,Rio Vista,2023,HE,386,1,Placeworks
+256,Riverside_2007.pdf,Riverside,2007,GP,110,0,
+257,Riverside_2021.pdf,Riverside,2021,EJE,57,0,
+258,Rosemead_2021.pdf,Rosemead,2021,HE,109,1,RRM Design Group; Veronica Tam and Associates; Morse Planning Group
+259,Ross_2023.pdf,Ross,2023,HE,439,1,Dyett and Bhatia
+260,Salinas_2023.pdf,Salinas,2023,HE,632,1,Veronica Tam and Associates
+261,San_Anselmo_2023.pdf,San Anselmo,2023,HE,576,1,Houseal Lavigne; Kimley Horn; CHPlanning; Atlas Planning Solutions
+262,San_Bruno_2023.pdf,San Bruno,2023,HE,43,0,
+263,San_Diego_2015.pdf,San Diego,2015,LUE,279,0,
+264,San_Diego_2020.pdf,San Diego,2020,HE,128,0,
+265,San_Dimas_2021.pdf,San Dimas,2021,HE,159,0,
+266,San_Fernando_2022.pdf,San Fernando,2022,HE,367,1,Houseal Lavigne; Veronica Tam and Associates; Rincon Consulting
+267,San_Francisco_2014.pdf,San Francisco,2014,RE,60,0,
+268,San_Francisco_2015.pdf,San Francisco,2015,HE,284,0,
+269,San_Francisco_2023.pdf,San Francisco,2023,HE,183,0,
+270,San_Jacinto_2022.pdf,San Jacinto,2022,HE,520,1,De Novo Planning Group
+271,San_Jose_2017.pdf,San Jose,2017,GP,508,1,Unknown
+272,San_Jose_2021.pdf,San Jose,2021,GP,511,1,Unknown
+273,San_Jose_2024.pdf,San Jose,2024,HE,1288,1,Tolemi; Community Planning Collaborative; Lawyers' Committee for Civil Rights Under Law
+274,San_Juan_Capistrano_2022.pdf,San Juan Capistrano,2022,EJE,413,0,
+275,San_Leandro_2016.pdf,San Leandro,2016,GP,526,1,Placeworks; Kittelson and Associates; Environmental Collaborative; Tom Origer and Associates
+276,San_Leandro_2023.pdf,San Leandro,2023,HE,536,1,Rincon Consultants; Veronica Tam and Associates; En2Action
+277,San_Luis_Obispo_2023.pdf,San Luis Obispo,2023,SE,103,1,Ascent Environmental; Civic Well; Fehr and Peers
+278,San_Marcos_2021.pdf,San Marcos,2021,HE,319,1,De Novo Planning Group
+279,San_Marino_2022.pdf,San Marino,2022,HE,324,1,Unknown
+280,San_Mateo_2024.pdf,San Mateo,2024,HE,386,1,Diana R. Elrod Consulting; Veronica Tam and Associates; Good City Company; Root Policy Research; Lawyers' Committee for Civil Rights Under Law
+281,San_Pablo_2011.pdf,San Pablo,2011,GP,350,1,Dyett and Bhatia; Dowling Associates; Environmental Science Associates; Charles Salter Associates
+282,San_Pablo_2024.pdf,San Pablo,2024,HE,440,1,Dyett and Bhatia
+283,San_Rafael_2021.pdf,San Rafael,2021,GP,472,1,BAE Urban Economics; Communities in Collaboration; Opticos Design; Fehr and Peers; Placeworks
+284,San_Rafael_2023.pdf,San Rafael,2023,HE,474,1,Barry Miller Consulting
+285,San_Ramon_2022.pdf,San Ramon,2022,HE,371,0,
+286,Sanger_2024.pdf,Sanger,2024,HE,242,1,Placeworks
+287,Santa_Ana_2022.pdf,Santa Ana,2022,HE,478,0,
+288,Santa_Ana_2023.pdf,Santa Ana,2023,GP,351,1,Placeworks; IBI Group; Fuscoe; MIG
+289,Santa_Barbara_2023.pdf,Santa Barbara,2023,HE,453,1,BAE Urban Economics
+290,Santa_Clarita_2023.pdf,Santa Clarita,2023,HE,303,1,Unknown
+291,Santa_Maria_2023.pdf,Santa Maria,2023,HE,310,1,Lisa Wise Consulting
+292,Santa_Monica_2022.pdf,Santa Monica,2022,HE,185,1,HR&A Advisors; John Douglas; Daniel Gehman; John Kaliski
+293,Santa_Paula_2020.pdf,Santa Paula,2020,GP,270,0,
+294,Santa_Paula_2022.pdf,Santa Paula,2022,HE,188,1,JHD Planning
+295,Santa_Rosa_2023.pdf,Santa Rosa,2023,HE,316,1,Placeworks
+296,Santee_2021.pdf,Santee,2021,HE,180,0,
+297,Santee_2022.pdf,Santee,2022,HE,185,0,
+298,Sausalito_2021.pdf,Sausalito,2021,GP,450,1,M-Group; FirstCarbon Solutions; Economic and Planning Systems; Parisi Transportation Consultants; BKF Engineers; Mott Macdonald
+299,Sausalito_2023.pdf,Sausalito,2023,HE,289,1,De Novo Planning Group
+300,Scotts_Valley_2023.pdf,Scotts Valley,2023,GP,384,1,Kimley-Horn
+301,Seal_Beach_2022.pdf,Seal Beach,2022,HE,47,1,Lisa Wise Consulting
+302,Selma_2024.pdf,Selma,2024,HE,232,1,Placeworks
+303,Shafter_2024.pdf,Shafter,2024,HE,371,0,
+304,Sierra_Madre_2022.pdf,Sierra Madre,2022,HE,236,1,Karen Warner Associates
+305,Sierra_Madre_2023.pdf,Sierra Madre,2023,SE,35,0,
+306,Signal_Hill_2022.pdf,Signal Hill,2022,HE,240,1,Unknown
+307,Soledad_2024.pdf,Soledad,2024,HE,282,1,Placeworks
+308,Solvang_2024.pdf,Solvang,2024,HE,564,1,Unknown
+309,South_El_Monte_2021.pdf,South El Monte,2021,HE,380,0,
+310,South_Lake_Tahoe_2011.pdf,South Lake Tahoe,2011,GP,92,0,
+311,South_Lake_Tahoe_2022.pdf,South Lake Tahoe,2022,HE,334,1,Placeworks
+312,South_Pasadena_2023.pdf,South Pasadena,2023,GP,202,1,Rangwala Associates; Moule and Polyzoides; HR&A Advisors; Nelson Nygaard; Psomas; ARG; Rincon
+313,South_San_Francisco_2022.pdf,South San Francisco,2022,GP,220,1,Raimi and Associates; Fehr and Peers; FirstCarbon Solutions; Strategic Economics; Plan to Place; Lisa Wise Consulting; January Advisors
+314,St_Helena_2023.pdf,St Helena,2023,HE,410,1,Unknown
+315,Stanton_2008.pdf,Stanton,2008,GP,149,1,RBF Consulting
+316,Stockton_2018.pdf,Stockton,2018,GP,244,1,Placeworks; Fehr and Peers; BAE Urban Economics; West Yost Associates; Tom Origer and Associates
+317,Stockton_2024.pdf,Stockton,2024,HE,582,1,Placeworks
+318,Sunnyvale_2023.pdf,Sunnyvale,2023,HE,690,1,Ascent Environmental
+319,Sutter_Creek_2019.pdf,Sutter Creek,2019,GP,952,1,Hauge Brueck Associates
+320,Tehama_2022.pdf,Tehama,2022,GP,266,0,
+321,Temecula_2022.pdf,Temecula,2022,HE,644,1,De Novo Planning Group
+322,Temple_City_2017.pdf,Temple City,2017,GP,180,1,Placeworks; Fehr and Peers
+323,Temple_City_2022.pdf,Temple City,2022,HE,243,1,Lisa Wise Consulting
+324,Thousand_Oaks_2022.pdf,Thousand Oaks,2022,HE,271,1,Veronica Tam and Associates
+325,Tiburon_2023.pdf,Tiburon,2023,GP,768,1,O'Rourke and Associates; Sustainable Community Planning; WRT; DeNovo Planning Group; TJKM Transportation Consultants
+326,Torrance_2022.pdf,Torrance,2022,HE,691,1,CityPlace Planning; Veronica Tam and Associates; Summit Environmental Group
+327,Truckee_2019.pdf,Truckee,2019,HE,200,0,
+328,Truckee_2023.pdf,Truckee,2023,GP,321,1,Ascent Environmental; Mintier Harnish; LSC Transportation Consultants; Kearns and West; BAE Urban Economics; Susan Lindstrom
+329,Ukiah_2022.pdf,Ukiah,2022,GP,450,1,Mintier Harnish; Rincon Consultants; GHD
+330,Union_City_2019.pdf,Union City,2019,GP,404,1,Mintier Harnish; Hexagon; Rincon Consultants; WRT; Applied Development Economics; UrbanGreen
+331,Union_City_2023.pdf,Union City,2023,HE,493,1,Ascent Environmental
+332,Vacaville_2023.pdf,Vacaville,2023,HE,742,1,Placeworks
+333,Vernon_2013.pdf,Vernon,2013,HE,59,1,Unknown
+334,Victorville_2022.pdf,Victorville,2022,HE,1084,1,Harris and Associates
+335,Villa_Park_2022.pdf,Villa Park,2022,HE,108,0,
+336,Visalia_2023.pdf,Visalia,2023,HE,427,1,Mintier Harnish
+337,Vista_2022.pdf,Vista,2022,HE,253,0,
+338,Walnut_2022.pdf,Walnut,2022,HE,225,1,Veronica Tam and Associates
+339,Walnut_Creek_2023.pdf,Walnut Creek,2023,HE,446,1,Harris and Associates
+340,Wasco_2024.pdf,Wasco,2024,HE,340,0,
+341,West_Hollywood_2023.pdf,West Hollywood,2023,HE,41,0,
+342,West_Sacramento_2021.pdf,West Sacramento,2021,HE,247,1,AECOM
+343,Westlake_Village_2021.pdf,Westlake Village,2021,HE,140,1,Civic Solutions; Veronica Tam and Associates
+344,Westminster_2022.pdf,Westminster,2022,HE,506,1,De Novo Planning Group
+345,Whittier_2022.pdf,Whittier,2022,HE,585,1,MIG
+346,Wildomar_2021.pdf,Wildomar,2021,SE,98,1,Placeworks
+347,Wildomar_2022.pdf,Wildomar,2022,HE,162,1,Placeworks
+348,Williams_2020.pdf,Williams,2020,HE,195,1,Price Consulting Services
+349,Williams_2023.pdf,Williams,2023,EJE,81,0,
+350,Willits_2019.pdf,Willits,2019,HE,98,1,Placeworks
+351,Willows_2022.pdf,Willows,2022,GP,120,1,De Novo Planning Group
+352,Willows_2023.pdf,Willows,2023,HE,198,1,HousingTools
+353,Windsor_2018.pdf,Windsor,2018,GP,253,1,Mintier Harnish; M-Group; Wtrans; Rincon Consultants
+354,Windsor_2023.pdf,Windsor,2023,HE,254,1,Placeworks
+355,Woodland_2023.pdf,Woodland,2023,HE,248,1,Lisa Wise Consulting
+356,Yountville_2019.pdf,Yountville,2019,GP,276,1, O'Rourke and Associates; De Novo Planning Group; Regional Government Services; WRT
+357,Yountville_2024.pdf,Yountville,2024,HE,248,1,Placeworks
+358,Yreka_2023.pdf,Yreka,2023,HE,249,1,Planwest Partners
+359,Yuba_City_2022.pdf,Yuba City,2022,HE,196,1,Placeworks
+360,Yucaipa_2022.pdf,Yucaipa,2022,HE,193,1,Placeworks
+361,Yucca_Valley_2022.pdf,Yucca Valley,2022,HE,232,1,Placeworks

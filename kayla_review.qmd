@@ -1,0 +1,28 @@
+---
+format: pdf
+fontsize: 12pt
+classoption: oneside
+geometry: margin=1in
+mainfont: Times New Roman
+sansfont: Times New Roman
+number-sections: false
+pagestyle: plain
+---
+
+## Review of:
+
+## Climate Activists and Environmentalists: A Love Hate Relationship with U.S. News Media
+
+This paper discusses the sentiments that newspaper sources use when discussing two terms: "environmentalists" and "climate activists". The author hypotheses that negative sentiment will be pronounced in both cases, but that 'activists' will be more negatively portrayed than 'environmentalists'. These sentiments are coded using two dictionaries, which provide general (but somewhat mixed) support for the hypothesis.
+
+This is a really interesting research question! I think it's really novel to look at the intersection between communication studies, environmental policy, and activism. There is a generally clear research design and clear results, which is great. As you make more edits, here are a few directions I think you can work towards. 
+
+First, I think this paper would benefit from an understanding of why we care about the difference between how the two terms are used. If, as you hypothesize, activist sentiment is more negative, then so what? You implicitly link this to your survey results which connect thermometer ratings of environmentalists/climate activists to policy support, and you can highlight the three step connect (news shaping of perspectives -> support for environmentalist/climate activist -> climate policy support). I think if you wanted to include more theoretical framework, this fits nicely with Zaller's Receive-Accept-Sample model and applies it to the effectiveness of climate activism (i.e., if activists are portrayed negatively, then the public is less likely to accept their message, which could lead to lower support for climate policies). 
+
+Second, you hint at supervised machine learning methods and I think this is an opportunity to introduce a human element into the research. Right now the only manual consideration is which terms activist should co-occur with, but there is no manual oversight over how sentiment is analyzed, which (as you highlight with the two dictionaries) leads to some disagreement over where the sentiment lies. I think that supervised sentiment dictionaries might be useful for this, but additional manual verification of the sentiment in the articles to fine-tune a supervised sentiment model for your specific corpus. 
+
+Third, you might dial in on specific negative sentiments to go further in depth with gaining an understanding of why this matters or how it operates specifically. For example, if activists are more likely to be portrayed as 'violent' or 'aggressive' in the media, that could have different implications compared to a portrayl of 'stupid' or 'dumb'. Further separating out a sentiment dictionary into different kinds of bad might highlight what messages people are getting from the media, and how that might affect their support for climate policies. Further, you might separate out your sources - the New York Times and Fox News would probably have different portrayals of activists (and maybe environmentalists), and that could be interesting to explore as well. 
+
+Finally, you mention you will be working with the full body text of the articles as well in the next iteration. A few thoughts on that process - similar to my first point above, why should we care about the full body of the text or how might we expect it to be different from headlines? I think you mentioned this but one hypothesis is that headlines are more sensationalized (stronger sentiment, probably negative) and the full body text might be more neutral. This would be an interesting analysis on an article-by-article basis, perhaps by news source, but also can prove to highlight your existing hypotheses on a larger corpus. I think there is also importance in documenting different levels of analysis, i.e., sum of word-level sentiment vs. average paragraph sentiment vs. average document sentiment, etc., and how that effects the results. 
+
+P.S. I was adding in the title of your paper - "love-hate relationship" is funny but does it tie in to your results? What is the love-hate relationship? If it's actually there that would be a great way to structure the hypotheses.

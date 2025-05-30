@@ -12,28 +12,37 @@ pagestyle: plain
 suppress-bibliography: true
 execute:
   eval: true
+  warning: false
 ---
 
 # Discussion Question:
 
 ## 1. Say you had ten poems, five describing the winter season and five describing the summer. The words “snow” and “cold” appear a handful of times in the winter poems and not at all in the summer poems. Imagine the result of applying the TF-IDF measure we’ve discussed in this module to these poems. Would the result adequately capture the importance of the words “cold” and “snow” to the winter concept? How about under different applications of the TF-IDF measure?
 
+It would depend on how you aggregate the documents. If you are interested in identifying how much the terms of interest appear relative to other terms using each poem as a unit of analysis, then the TF-IDF measure would highlight these, since the *TF* component would be non-zero (but fairly low) and the *IDF* component would be relatively high, since the minimum value would be $log(10/5)$ if the term appeared in each of the winter poems. However, if you aggregate these values into 'winter' and 'summer' poems, then the TF value would probably decrease since there are only two terms of interest among many total terms across the five winter poems. The IDF value would also decrease, since the previous minimum value would now be the maximum value, since the winter IDF would always be $log(2/1)$. In both cases, the TF-IDF of these terms for the summer poems would be zero, since the TF value would have a numerator of zero.
+
 # Project Questions (show your work):
 
 ## 1. Generate a list of the top terms/concepts in the data you tokenized from the pre-processing module (or another corpus, if you prefer).
 
 ```{r}
+#| output: false
+
 library(tidyverse)
 library(quanteda)
 library(quanteda.textstats)
+library(quanteda.textplots)
+library(ggwordcloud)
+
 
 load('../Module3/combined_data.RData')
 
 ```
 
 ```{r}
+
 eir_data <- combined_data %>% 
-  filter(`Document Type` == 'EIR')
+  filter(`Document Type` %in% c('EIR', 'NOD', 'NOE', 'MND', 'NEG'))
 
 eir_data_clean <- eir_data %>% 
   filter(!grepl("withdrawn", `Document Title`, ignore.case = TRUE)) %>%
@@ -43,8 +52,11 @@ eir_data_clean <- eir_data %>%
   mutate(year = year(Recieved),
          `Contact City` = str_to_title(`Contact City`))
 
+eir_data_clean <- eir_data_clean %>% 
+  mutate(tempid=seq(1, nrow(eir_data_clean)))
+
 eir_corpus <- corpus(eir_data_clean, 
-                      docid_field = "SCH Number", 
+                      docid_field = "tempid", 
                       text_field = "Document Description")
 
 # see which tokens are most prevalent in the corpus
@@ -55,24 +67,92 @@ all_tokens <- tokens(eir_corpus,
   tokens_tolower() %>%
   tokens_remove(pattern = stopwords("en"))
 
-textstat_frequency(dfm(all_tokens)) %>% 
-  head(25)
+# coloc <- textstat_collocations(all_tokens, size = 2:3, min_count = 10)
+# 
+# tokens_compound(all_tokens, coloc, concatenator = " ") %>%
+#     tokens_select(padding=FALSE) %>% 
+#     tokens_wordstem()
 
+textstat_frequency(dfm(all_tokens)) %>% 
+  head(10)
 
 ```
+
+Note: I opt out of doing collocation analysis due to the size of my dataset and limited compute available. 
 
 ## 2. Now generate a list of the top terms/concepts by group (e.g., by year).
 
 ```{r}
 
 dfm(all_tokens) %>% 
-  textstat_frequency(groups = year) %>% 
-  head(25)
+  textstat_frequency(groups = `Document Type`, n=10) %>% 
+  head(50)
 
 ```
 
 ## 3. Create a word cloud of top terms representing each group How might we interpret these results?
 
+```{r}
+#| warning: false
+
+topwords_dfm <- dfm(all_tokens) %>% 
+  dfm_trim(min_termfreq = 10, min_docfreq = 10, docfreq_type = "count") %>% 
+  dfm_group(groups = `Document Type`)
+
+textplot_wordcloud(topwords_dfm, 
+                   comparison=T,
+                   max_words=80,
+                   min_size = 0.5)
+
+```
+
+One notable omission from this wordcloud producer is that each term only appears once, even if it appears in multiple 'documents'. In my dataset, "project" is always the most common word yet only appears under EIR - this is particularly surprising, given that EIRs actually make up a relatively small portion of the documents in the corpus. As such, this visualization is actually grossly misleading - as seen in the table above, not only does 'project' appear in all of the documents at a high rate, but in terms of raw count, at a higher rate than in EIRs. In this case there is also a need for controlling for the number of documents in a group, as part of the administrative process gurantees that there will be a NOD for *every* project, whereas the other groups used here are (mostly) mutually exclusive.
+
 ## 4. Now repeat steps #2 and #3 this time based on TF-IDF. How might we interpret these results?
 
+```{r}
+#| warning: false
+
+topwords_dfm_tfidf <- dfm(all_tokens) %>%
+  dfm_trim(min_termfreq = 10, min_docfreq = 10, docfreq_type = "count")  %>% 
+  dfm_tfidf() %>% 
+  dfm_group(groups = `Document Type`, force=TRUE)
+
+
+topwords_dfm_tfidf_plot <-  textstat_frequency(topwords_dfm_tfidf,
+                       groups = `Document Type`,
+                       n=50,
+                       force=TRUE) 
+
+eir_plot <- topwords_dfm_tfidf_plot %>% 
+  filter(group == "EIR") 
+
+mnd_plot <- topwords_dfm_tfidf_plot %>% 
+  filter(group == "MND")
+
+ggwordcloud(words = eir_plot$feature, 
+            freq = eir_plot$frequency)
+
+ggwordcloud(words = mnd_plot$feature, 
+            freq = mnd_plot$frequency)
+
+# textplot_wordcloud(topwords_dfm_tfidf, 
+#                    comparison=T,
+#                    force=TRUE,
+#                    max_words=80,
+#                    min_size = 0.5)
+
+
+```
+
+Here, we have my attempt at recreating word clouds for the two primary groups of interest: EIRs and MNDs. For context, an EIR or Environmental Impact Review is required for any project that is likely to have a significant impact on the environment, while an MND or Mitigated Negative Declaration is a less intensive review that is used when the project is not unlikely to have a significant impact on the environment. Also, I'm frankly not a huge fan of word clouds and feel like they mostly obscure things (I have a lot of trouble distinguishing between two similar but different text sizes). The primary benefit of this method is that we can actually compare the frequency of terms between groups, which was not possible in the previosu wordcloud due to the one-word-per-wordcloud rule. Substantively, we can notice that 'residential' appears more frequently in MNDs than EIRs, suggesting that many developers intend to build residential projects that do not require a full EIR. On the other hand, parking appears more commonly in EIRs than MNDs, suggesting these projects require significant review over their environmental impacts.
+
 ## 5. Finally, discuss: what worked and what didn’t, and why? Explain the similarities and differences between your two approaches and what you learned.
+
+Between TF-IDF and word count, I think the TF-IDF method is more useful for identifying the most important terms in a document. However, it seems that in these examples and the lectures there is a large emphasis given to aggregating documents (such as Trump tweets on iPhone vs Android), which seems counterproductive given the tendency for TF-IDF to punish terms that appear in many documents. I suppose, as usual, it depends on the research question. In my example here, I was interested in the most common terms in each document type, and neither method worked particularly well. The trick is to balance for which terms are most common, but some terms are *so* common that their TF-IDF is reduced, whereas when the grouping is done too soon, the only terms that appear are relatively meaningless and appear in only one or two documents. I think getting a grip on when and how to take each step would take practice and is just not that intuitive from first blush.
+
+In general, this was an interesting section but I am still left confused over the utility of word counts as a research methodology. It certainly seems important as part of understanding your data or EDA, but I'm not convinced by this exercise nor by the Atkinson et al. paper that this is a theoretically viable method for rigorous quantitative analysis. Finally, a bit of a complaint - I'm not that big a fan of the quanteda package. I find it a bit clunky in how the different object types (particularly DFMs - why are they not data frames??) operate and how the different textstat functions are named and used. 
+
+
+
+

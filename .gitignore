@@ -3,4 +3,13 @@
 .Rhistory
 .RData
 .Ruserdata
-*.DS_Store
+.DS_Store
+*.pdf
+
+Module3/
+Module4/
+Module5/
+Module6/
+Module7/
+Module8/
+downloaded_pdfs/

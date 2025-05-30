@@ -25,6 +25,170 @@ library(tidytext)
 library(tidycensus)
 library(stargazer)
 
+ej_dictionary <- dictionary(list(
+  identifying_disadvantaged_communities = c(
+    "disadvantaged communit*", "disproprtionat* affect*",
+    "pollution* burden*", "pollution*",
+    "hazard*", "health effect*",
+    "exposure*", "environmental degradation*",
+    "CalEnviroScreen", "pollution burden*", "census tract*", "screen*", "community-specific data",
+    "vulnera*", 
+    "household income*","median income", "MHI", "income limit*", 
+    "health risk factor*", "environmental burden*", 
+    "health risk*", "community needs",
+    "historical trend*", "gentrification", "displacement*", 
+    "fringe communit*", "unincorporated communit*", 
+    "equit*", "inequit*", 
+    "low-income area*", "low-income population*", "sensitive population*",
+    "minority population*",
+    "racial minorit*", "communit* of color", 
+    "tribal government*", "tribal culture*", 
+    "environmental racism", "redlining", "disinvestment*", "segregat*", "systemic oppression"
+  ),
+  reducing_pollution_exposure_air_quality = c(
+    "pollut*", "pollution exposure*", "reduce exposure*", "reduc* pollut*",
+    "unique health risk*", "compounded health risk*", "health hazard*", 
+    "air qualit*", 
+    "mobile source*", "stationary source*", 
+    "emission*", 
+    "fossil fuel combustion",
+    "vehicle miles traveled", "VMT", "mode shift", "active transportation", "zero-emission", "electric fleet*", 
+    "sensitive land use*", 
+    "high-volume roadway*", "major arterial*", "freeway*", "truck route*",
+    "freight-handling facilit*", "manufacturing facilit*", "industrial air pollution*", 
+    "mitigation procedure*", "mitigation*", "low-carbon technolog*", 
+    "zero-emission vehicle*", "ZEV", 
+    "solar generation", "wind generation", 
+    "indoor filtration system*", "polluting substance*", "water qualit*", "soil pollution*",
+    "noise",
+    "asthma", "birth defect*", "cancer*", "heart disease*", "neurologic disorder*", "reproductive disorder*", 
+    "involuntary exposure*", "second-hand smoke", "third-hand smoke", "tobacco smoke", "smoke-free zone*","tobacco outlet*",
+    "pesticide*", "integrated pest management", "regenerative agriculture",
+    "air quality management district*", "aqmd", "carb", "california air resources board", 
+    "community air protection program*", "ab 617", "community emissions reduction program*",
+    "air quality monitoring", "emissions control limit*", "emissions data", 
+    "toxic hot spot*",
+    "transitional land use*", "industrial facilit*", 
+    "hazardous facilit*", "hazardous waste", "solid waste site*", "brownfield development",
+    "remediation", "cleanup", 
+    "near-roadway siting",
+    "diesel PM", "toxic air contaminant*", "ozone", "pm 2.5",
+    "groundwater threat*", "water contaminant", 
+    "impaired water bod*", "toxic cleanup site*", 
+    "traffic densit*"
+  ),
+  promoting_public_facilities = c(
+    "public facilit*", "public improvement*", "public service*",
+    "community center*", "librar*", "public transit", "park*", "recreation facilit*",
+    "safe drinking water", "wastewater service*", 
+    "active transportation infrastructure","flood control", "water drainage", 
+    "health care service*", "hospital*", "health clinic*",
+    "broadband access", "internet access", 
+    "disaster preparedness", "recovery capacit*",
+    "amenit*", "park*", "trail*", "sidewalk*", "public transit"
+  ),
+  promoting_food_access = c(
+    "food access", "healthy food*", "affordable food*", "food desert*",
+    "food insecur*", "nutrition", "obesit*", 
+    "food choice*", "food system*",
+    "grocery store*", "farmer* market*", 
+    "community garden*", "urban farm*", "convenience store*",
+    "fresh produce", "food procurement polic*", 
+    "food production", "food distribution", "food processing", "food consumption", 
+    "waste disposal", 
+    "locally grown food*", "farm to market",
+    "CalFresh", 
+    "food recovery program*", "SB 1383", 
+    "fresh fruit*", "fresh vegetable*",
+    "self-reported food insecurit*"
+  ),
+  promoting_safe_sanitary_homes = c(
+    "safe home*", "sanitary home*", "promot* safe and sanitary home*", 
+    "housing location*", "housing qualit*", "housing affordabilit*", "housing stabilit*",
+    "lower income household*", "special needs household*", 
+    "Regional Housing Need Allocation", "RHNA",
+    "fair share planning", 
+    "accessible transit", 
+    "pest infestation", "water intrusion", "mold", "poor insulation",
+    "exposure to toxin*", "lead exposure", "lead based paint",
+    "second-hand smoke", "third-hand smoke",
+    "weatherize home*", "modernize home*",
+    "green building practice*", "sustainable building practice*", 
+    "new housing construction", "major retrofit*", 
+    "affordable housing", "unstable living condition*", "housing price*", 
+    "household occupancy rate*", "overcrowded living condition*",
+    "rising rent*", "displacement*","marginally housed", "homelessness", 
+    "renter protection",
+    "preserving affordable housing", "housing cost burden", "homelessness data",
+    "household characteristic*"
+  ),
+  promoting_physical_activity = c(
+    "physical activit*", "physical inactivit*", 
+    "chronic disease*",
+    "obesit*", "diabetes", "high blood pressure", "high cholesterol", "heart disease*",
+    "mental health", "well-being",
+    "park*", "recreation", "open space", "recreational facilit*",
+    "park poor", "park improvement*", 
+    "no smoking polic*", 
+    "joint use agreement*", "shared use agreement*",
+    "active transportation", 
+    "walking", "biking", "daily routine*", "perform errand*",
+    "walking to work", "biking to work", "walking to school", "biking to school",
+    "active design guideline*",
+    "connected bike route*", "pedestrian on-street route*", 
+    "infill development", "Complete Street*",
+    "multimodal transit", "interconnected transit", 
+    "first mile polic*", "last mile polic*",
+    "covered rest area*", "shade", "age friendly seating", "bike storage", "trail network*",
+    "Sustainable Communities and Climate Protection Act", "SB 375",
+    "Active Transportation Program", "Safe Routes to School", "SRTS", 
+    "safety of route*", "aging in place",
+    "naturally occurring retirement communit*", "NORC",
+    "walkable communit*",
+    "park access", "unintentional injur* involving pedestrian*",
+    "crash data", "walk trip* per capita", "bike trip* per capita",
+    "children who walk* to school", "children who bike* to school", "children who roll* to school",
+    "walk map*", "bike map*",
+    "perception of safet*"
+  ),
+  reducing_unique_compounded_health_risks = c(
+    "unique health risk*", "compounded health risk*",
+    "reduce health risk*", 
+    "climate change", "climate vulnerabilit*", "climate adaptation", 
+    "adaptation", "resilience", "resiliency",
+    "flooding", "drought", "wildfire*", "extreme heat", 
+    "greenhouse gas emission*", "GHG", "vulnerable communit*",
+    "temperature record*", "heat stroke", "heat-related complication*", "heat island*", "cooling center*",
+    "green infrastructure", "urban forestry", "urban greening", "cool surface*", "cool roof*",
+    "green roof*", "tree canop*", 
+    "carbon capture", 
+    "energy efficienc*",
+    "drought mitigation", "stagnant water", "mosquito reproduction", "insect-borne disease*",
+    "dengue", "yellow fever", 
+    "sea level rise", 
+    "fire hazard severity zone*", "FHSZ",
+    "precipitation change*", "snowpack loss", "extreme precipitation event*",
+    "extended drought scenario*", "wildfire threat*", "air conditioning access"
+  ),
+  promoting_civic_engagement = c(
+    "civic engagement", 
+    "public decision-making process*", "public participation",
+    "community engagement", "community vision*", 
+    "local histor*", "relationship*", "trust", "rebuild trust",
+    "community-based organization*", "CBO*", 
+    "advocacy group*", 
+    "trusted leader*",
+    "barrier* to participation", "time conflict*",
+    "meeting format*", "planning process*", "ongoing engagement",
+    "general plan implementation", 
+    "local neighborhood-level specific plan*", 
+    "revitalization effort*", 
+    "community-facing program*", 
+    "community input", "community buy-in", "community support",
+    "stakeholder communit*", "community advisory committee"
+  )
+  ))
+
 plan_corpus <- readRDS("plans_corpus_doc.rds")
 
 plan_metadata <- read_csv('../plans_metadata.csv') %>% 
@@ -63,7 +227,8 @@ docvar_df <- docvars(plan_corpus) %>%
     mhi_bin = as.factor(cut(mhi, 
                   breaks = quantile(mhi, probs = seq(0, 1, length.out = 5), na.rm = TRUE), 
                   include.lowest = TRUE, 
-                  labels = FALSE))
+                  labels = FALSE)),
+    single_consultant = str_split_i(consultant_name, ';', 1),
   ) %>% 
   tibble()
 
@@ -91,6 +256,9 @@ for (letter in letters) {
 
 plan_tokens <- tokens(plan_corpus) %>% 
   tokens_tolower() %>%
+  tokens_compound(ej_dictionary, 
+                  valuetype = "glob", 
+                  case_insensitive = TRUE) %>%
   tokens_remove(place_names_remove) %>%
   tokens_remove(stopwords("en")) %>%
   tokens_remove(c('st', 'ave', 'rd', 'blvd'))%>%
@@ -108,11 +276,40 @@ plan_dfm <- plan_tokens %>%
            docfreq_type = "count") %>%
   dfm_subset(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE")
 
+ej_dfm <- plan_tokens %>% 
+  dfm() %>% 
+  # dfm_tfidf() %>% 
+  dfm_keep(ej_dictionary) %>% 
+  dfm_subset(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE")
+
+ej_dfm_tfidf <- ej_dfm %>% 
+  dfm_tfidf() 
+
+ej_dfm_dict <- ej_dfm %>% 
+  dfm_lookup(ej_dictionary, 
+             valuetype = "glob", 
+             case_insensitive = TRUE) %>%
+  dfm_group(group = plan_type,
+            force = TRUE)
+
 docvars(plan_dfm) <- docvar_df %>% filter(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE" )
 
 plan_dfm <- plan_dfm[rowSums(plan_dfm) > 0, ] 
 
-freq <- textstat_frequency(plan_dfm, force=TRUE)
+docvars(ej_dfm) <- docvar_df %>% filter(plan_type == "EJE" | plan_type == "GP" | plan_type == "HE" )
+
+ej_dfm <- ej_dfm[rowSums(ej_dfm) > 0, ]
+
+freq_tfidf <- textstat_frequency(ej_dfm_tfidf, 
+                   force=TRUE) %>%
+  tibble(); freq_tfidf
+
+freq_by_main_consultant <- textstat_frequency(ej_dfm,
+                   force=TRUE,
+                   groups=single_consultant) %>%
+  tibble() %>%
+  group_by(group) %>%
+  slice_max(order_by = frequency, n = 10) ; freq_by_main_consultant
 
 # ej_dfm %>%
 #   textstat_frequency(groups=county, force=TRUE) %>%
@@ -126,6 +323,7 @@ freq <- textstat_frequency(plan_dfm, force=TRUE)
 #   slice_max(order_by = frequency, n = 20) %>% 
 #   arrange(group, desc(frequency))
 
+
 plan_sim_df <- tibble(as.data.frame(textstat_simil(plan_dfm,  method='cosine'))) %>% 
   left_join(docvar_df, 
             by = c("document1" = "doc_id")) %>% 
@@ -137,32 +335,89 @@ plan_sim_df <- tibble(as.data.frame(textstat_simil(plan_dfm,  method='cosine')))
          both_used_consultant = as.factor(ifelse(consultant_binary.x == 1 & consultant_binary.y == 1, 1, 0)),
          # same_consultant1 = ifelse(consultant_name.x == consultant_name.y, 1, 0),
          # same_consultant = as.factor(ifelse(is.na(same_consultant1), 0, same_consultant1)),
-         any_shared_consultant = as.factor(mapply(function(a, b) length(intersect(a, b)) > 0, consultant_list.x, consultant_list.y)),
-         n_shared_consultants = mapply(function(a, b) length(intersect(a, b)), consultant_list.x, consultant_list.y),
+         any_shared_consultant = as.factor(
+           mapply(function(a, b) {
+             if (is.null(a) || is.null(b) || (all(is.na(a)) & all(is.na(b)))) {
+               0
+               } else {
+                 as.integer(length(intersect(a, b)) > 0)
+                 }
+             }, consultant_list.x, consultant_list.y)),
+         n_shared_consultants = mapply(function(a, b) {
+           if (
+             (is.null(a) || all(is.na(a)) || identical(a, "NA")) &&
+             (is.null(b) || all(is.na(b)) || identical(b, "NA"))
+             ) {
+             0
+             } else if (is.null(a) || all(is.na(a)) || identical(a, "NA") ||
+                        is.null(b) || all(is.na(b)) || identical(b, "NA")) {
+               0
+               } else {
+                 length(intersect(a, b))
+                 }
+           }, consultant_list.x, consultant_list.y),
          same_plan_type = as.factor(ifelse(plan_type.x == plan_type.y, 1, 0)),
          both_eje = as.factor(ifelse(plan_type.x == "EJE" & plan_type.y == "EJE", 1, 0)),
          both_gp = as.factor(ifelse(plan_type.x == "GP" & plan_type.y == "GP", 1, 0)),
          both_he = as.factor(ifelse(plan_type.x == "HE" & plan_type.y == "HE", 1, 0)),
          length_dif = abs(plan_length.x - plan_length.y)
-         ) %>%
-  select(-c(plan_year.x, plan_year.y, 
-            plan_length.x, plan_length.y, 
-            city_name.x, city_name.y,
-            pop_bin.x, pop_bin.y, 
-            mhi_bin.x, mhi_bin.y))
+         ) 
 
-# 
-# mod_1 <- lm(log(cosine) ~ any_shared_consultant,
-#             data = plan_sim_df) 
 
-mod_2 <- lm(log(cosine) ~  any_shared_consultant + same_year + both_eje + both_gp + both_he,
-            data = plan_sim_df) 
 
-mod_3 <- lm(log(cosine) ~  same_year + both_eje*any_shared_consultant + both_gp*any_shared_consultant + both_he*any_shared_consultant ,
-            data = plan_sim_df) 
+ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine'))) %>% 
+  left_join(docvar_df, 
+            by = c("document1" = "doc_id")) %>% 
+  left_join(docvar_df, 
+            by = c("document2" = "doc_id")) %>% 
+  mutate(same_year = as.factor(ifelse(plan_year.x == plan_year.y, 1, 0)),
+         same_pop = as.factor(ifelse(pop_bin.x == pop_bin.y, 1, 0)),
+         same_mhi = as.factor(ifelse(mhi_bin.x == mhi_bin.y, 1, 0)),
+         both_used_consultant = as.factor(ifelse(consultant_binary.x == 1 & consultant_binary.y == 1, 1, 0)),
+         # same_consultant1 = ifelse(consultant_name.x == consultant_name.y, 1, 0),
+         # same_consultant = as.factor(ifelse(is.na(same_consultant1), 0, same_consultant1)),
+         any_shared_consultant = as.factor(
+           mapply(function(a, b) {
+             if (is.null(a) || is.null(b) || (all(is.na(a)) & all(is.na(b)))) {
+               0
+               } else {
+                 as.integer(length(intersect(a, b)) > 0)
+                 }
+             }, consultant_list.x, consultant_list.y)),
+         n_shared_consultants = mapply(function(a, b) {
+           if (
+             (is.null(a) || all(is.na(a)) || identical(a, "NA")) &&
+             (is.null(b) || all(is.na(b)) || identical(b, "NA"))
+             ) {
+             0
+             } else if (is.null(a) || all(is.na(a)) || identical(a, "NA") ||
+                        is.null(b) || all(is.na(b)) || identical(b, "NA")) {
+               0
+               } else {
+                 length(intersect(a, b))
+                 }
+           }, consultant_list.x, consultant_list.y),
+         same_plan_type = as.factor(ifelse(plan_type.x == plan_type.y, 1, 0)),
+         both_eje = as.factor(ifelse(plan_type.x == "EJE" & plan_type.y == "EJE", 1, 0)),
+         both_gp = as.factor(ifelse(plan_type.x == "GP" & plan_type.y == "GP", 1, 0)),
+         both_he = as.factor(ifelse(plan_type.x == "HE" & plan_type.y == "HE", 1, 0)),
+         length_dif = abs(plan_length.x - plan_length.y)
+         ) 
 
-mod_5 <- lm(log(cosine) ~  same_year + both_eje*any_shared_consultant + both_gp*any_shared_consultant + both_he*any_shared_consultant + same_pop + same_mhi,
-            data = plan_sim_df) 
+# mod_1 <- lm(log(cosine) ~ any_shared_consultant + same_year + same_pop + same_mhi,
+#             data = ej_sim_df)
+
+mod_2 <- glm(cosine ~  any_shared_consultant + same_year + both_eje + both_gp + both_he,
+             family=quasibinomial(),
+            data = ej_sim_df) 
+
+mod_3 <- glm(cosine ~  same_year + both_eje*any_shared_consultant + both_gp*any_shared_consultant + both_he*any_shared_consultant ,
+             family=quasibinomial(),
+            data = ej_sim_df) 
+
+mod_5 <- glm(cosine ~  same_year + both_eje*n_shared_consultants + both_gp*n_shared_consultants + both_he*n_shared_consultants + same_pop + same_mhi,
+             family=quasibinomial(),
+            data = ej_sim_df) 
 
 stargazer( mod_2, mod_3, mod_5, 
           type='text',
@@ -189,23 +444,27 @@ consultants <- unique(unlist(docvar_df$consultant_list))
 
 # Introduction
 
-In 2016, the state of California passed Senate Bill 1000, which required that certain general plans address environmental justice (EJ), in addition to previously required elements including housing, land use, safety, and others. Previous research suggests that these plans vary greatly in their content and that further research should seek to explain "the context in which plans were made \[...\], including the use of consultants" [@brinkley2024, pp. 68]. This article intends to do just that, by questioning what effect the use of consulting firms has on the similarity between environmental justice elements. A greater understanding of how consultants impact the policy development process can have normative implications for the policies that are developed in the EJ context, which prioritizes localized, participatory development over centralized or standardized approaches. Further, consultants are frequently used in the environmental policy process, particularly in the environmental review process, and results may indicate further avenues of research.
+In 2016, the state of California passed Senate Bill 1000, which required that city general plans address environmental justice (EJ). A general plan lays out the status quo and goals of a city, and is composed of different elements, including the housing element (the only element requiring state approval), safety element, land use element, and others. In implementing EJ, cities are given the option between a standalone EJ element or incorporating this material across the general plan. Previous research suggests that the implementation of EJ into plans varies greatly and that further research should seek to explain "the context in which plans were made \[...\], including the use of consultants" [@brinkley2024, pp. 68]. This article intends to do just that, by questioning what effect the use of consulting firms has on the similarity between environmental justice elements. A greater understanding of how consultants impact the policy development process can have normative implications for the policies that are developed in the EJ context, which prioritizes localized, participatory development over centralized or standardized approaches. Further, consultants are frequently used in the environmental policy process, particularly in the environmental review process, and results may indicate further avenues of research.
 
-Here, I focus on a single hypothesis regarding the use of consultants. Previous research on boilerplate text has indicated that documents sharing consulting firms have increased use of boilerplate text [@scott2022]. Further, the use of consultants is often intended to reduce friction in the review process through normalized and standardized processes [@kingsley2017]. As such, I hypothesize that the use of consulting firms in the development of EJ elements will lead to increased similarity between documents.
+Here, I focus on a single hypothesis regarding the use of consultants. Previous research on boilerplate text has indicated that documents sharing consulting firms have increased use of boilerplate text [@scott2022]. Further, the use of consultants is often intended to reduce friction in the review process through normalized and standardized processes [@kingsley2017]. However, the role that consultants play in the environmental policy proces, particulalry in the development of substantive local policy, is still not well understood [@scott2019; @marciano2023]. As such, I hypothesize that two documents which use the consulting firm will have increased similarity in their discussion of environmental justice than two firms which do not.
 
 # Methods
 
-The General Plan Database Mapping Tool was used to conduct this analysis (plansearch.caes.ucdavis.edu). This database was constructed through manual compilation of relevant general plan documents across California cities, and is primarily used as a website which allows users to search for a term across all plans available in the database [@banginwar2023; @poirier2024]. The database has been updated several times since its initial use in a 2017 article \[CITE\]. Documents were manually downloaded from the website and totaled 361 unique documents at the time of download, covering 288 unique cities.
+The General Plan Database Mapping Tool was used to conduct this analysis (plansearch.caes.ucdavis.edu). This database was constructed through manual compilation of relevant general plan documents across California cities, and is primarily used as a website which allows users to search for a term across all plans available in the database [@banginwar2023; @poirier2024]. The database has been updated several times since its initial use in a 2017 article. Documents were manually downloaded from the website and totaled 361 unique documents at the time of download, covering 288 unique cities.
 
-Documents were transformed from the pdf format to text corpuses using the `pdftools` and `quanteda` packages in R. Whitespace characters such as newline (`\n`) were removed but documents were otherwise unaltered. After an initial review of documents it was necessary to tag the specific type of general plan document for each, as the dataset included general plans, housing elements, environmental justice elements, and safety elements. For each document, the first two pages were searched for text specifying which element was listed, such that if "Environmental Justice Element" was on the first page, the document would be tagged as such. For the documents which could not be automatically tagged for some reason, as well as the subset used in this analysis for additional verification, the author manually provided and verified the plan type tags. One limitation of this approach is that EJ elements contained within General Plans, such as the 2011 National City General Plan, are excluded from analysis here.
+Documents were transformed from the pdf format to text corpuses using the `pdftools` and `quanteda` packages in R. Whitespace characters such as newline (`\n`) were removed but documents were otherwise unaltered. After an initial review of documents it was necessary to tag the specific type of general plan document for each, as the dataset included general plans, housing elements, and environmental justice elements, with a small number of other elements. Each document type was manually coded by the author. In order to make comparisons between a sufficiently large sample, the analysis was restricted to only these three kinds of documents, which make up 95% of the dataset[^1].
 
-In total, 13 environmental justice elements were identified, each representing a different California city. These include Antioch in Contra Costa county, Arvin in Kern county, Gardena, Inglewood, Lynwood, Monrovia, and Maywood in Los Angeles county, Menlo Park in San Mateo county, Oakland in Alameda County, Perris and Riverside in Riverside County, Rialto in San Bernardino County, and San Juan Capistrano in Orange county. While these are not the only documents in the dataset that address environmental justice, they are selected due to their topical focus on *only* environmental justice, as opposed to environmental justice in the context of housing or safety.
+[^1]: Seven safety elements and five land use elements were dropped, along with six other elements which appeared once each.
+
+Several processing steps were taken for each document, the most important being the selection of terms within a manually-created dictionary. There are statutory requirements for EJ elements to cover eight different topics: identifying disadvantaged communities (DACs), policies to reduce exposure to pollution, to promote public facilities, food access, safe and sanitary homes, physical activity, civic engagement in the public decision-making process, and reduce other health risks in disadvantaged communities [@governorsofficeofplanningandresearch2020]. In the guidelines for these requirements, the Office of Planning and Research highlights a wide variety of related ideas and avenues for implementation for each. The vocabularly used in this document guided the formation of the environmental justice dictionary used to reduce the features of the corpuses. Of the more than 19 million tokens across the corpuses, the author identified 353 which specifically related to one of the eight EJ topics. These selections were not mutually exclusive - for example, the term obesity appears in both food access and physical activity policy topics. These tokens could also be multi-word phrases. The terms included in the dictionary were inspected in-context to ensure that, generally, their discussion was linked to the EJ topic to which they were assigned.
+
+This is likely due to another pre-processing choice: the weighting of a document feature matrix (DFM) with term frequency - inverse document frequency (TF-IDF) values.
+
+TF-IDF values weight the features (or terms) in a DFM based on their document-level frequency and corpus-level frequency, such that terms which are uniquely frequent in few documents are more heavily weighted than terms which are frequent across all or many documents. As such, this weighting procedure transforms the frequency of a term into the relative frequency of a term. This procedure was selected for this analysis due to the expectation that there would be significant similarity between documents as they are intended to be similar. TF-IDF weighting provides a consistent and understandable method of controlling for this expectation. Finally, any terms which only appear in one document are removed, as the nature of comparison between two documents would be biased by terms which appear in one document but not the other.
 
 ## Dependent Variable
 
-The dependent variable in this analysis is the similarity between two documents. Several pre-processing steps were taken prior to this calculation. After tokenization, a subset of tokens were removed, including city and county names, stopwords, letters, and the terms "st", "ave", "rd", and "blvd", followed by the removal of punctuation, symbols, and numbers, and finally word stemming. These choices were made after initial analysis highlighted they are among the most common terms in some documents but are substantively unimportant on their own. However, sensitivity testing indicates that results are somewhat robust regardless of their inclusion or exclusion, with the exception of removing city and county names. This is likely due to another pre-processing choice: the weighting of a document feature matrix (DFM) with term frequency - inverse document frequency (TF-IDF) values.
-
-TF-IDF values weight the features (or terms) in a DFM based on their document-level frequency and corpus-level frequency, such that terms which are uniquely frequent in few documents are more heavily weighted than terms which are frequent across all or many documents. As such, this weighting procedure transforms the frequency of a term into the relative frequency of a term. This procedure was selected for this analysis due to the expectation that there would be significant similarity between documents as they are intended to be similar. There are statutory requirements for EJ elements to cover certain topics, including pollution exposure, food access, and civic engagement, among others [@governorsofficeofplanningandresearch2020]. TF-IDF weighting provides a consistent and understandable method of controlling for this expectation. Finally, any terms which only appear in one document are removed, as the nature of comparison between two documents would be biased by terms which appear in one document but not the other.
+The dependent variable in this analysis is the similarity between two documents.
 
 Given the resultant DFM, cosine similarity was calculated between each pair of documents, for a total of 78 pairwise comparisons. Cosine similarity measures the cosine between two vectors in a high-dimensional space, where each vector is equal in length to the number of features in a DFM. Higher normalized cosine measurements indicate higher similarity between documents.
 

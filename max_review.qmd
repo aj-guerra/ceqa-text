@@ -1,0 +1,27 @@
+---
+format: 
+  pdf:
+    header-includes:
+      - \raggedright{}
+fontsize: 12pt
+classoption: oneside
+geometry: margin=1in
+mainfont: Times New Roman
+sansfont: Times New Roman
+number-sections: false
+pagestyle: plain
+---
+
+## Review of:
+
+## Max's Party Embeddings Project
+
+This paper is intended to convert a corpus of parliamentary speech data, via a word embeddings model, into a meaningful and understandable dimensional space which can characterize the speeches. Given the word embeddings for a subset of the speeches, the author reduces the dimensionality of the data using PCA and visualizes these dimensions, following the methodology in Rheault and Cochrane (2020). Primarily, the paper follows the reader through the code and the steps taken in the data analysis process. Once the results are plotted, there is a lack of differentiation between the conservative party, labor party, and libdem speeches. When the words fit two these dimensions are shown, they show some variance between the parties, but not much. 
+
+I liked several aspects of this paper. The motivation for the project is clearly articulated, highlighting how it would be beneficial to comparative politics research  to have a measurement point estimators of legislators. The included hypotheses, while not tested here, provide a clear path forward once the issues are figured out. Clearly it has the theoretical underpinnings it would need to develop into a journal article. 
+
+With regards to to the issues with PCA not finding the desired degree of variation, I would first recommend a more rigorous approach to the text pre-processing - this might include removing stop words, as it was unclear what form the data is provided in initially. Also, obviously computational limitations are an issue when working with word embeddings, but the given year you subset to might be part of what is driving the lack of variety - everyone that year perhaps talked about similar things? You might try expanding the dataset to a random sample rather than a selected one, and see if/how growing that can improve separation of labor-conservative speeches. Finally, one of the points that Amber made was the importance of some sort of qualitative/squishy/human element to each analysis, whether it is manually coding certain variables or making important decisions about the data and justifying them. I don't really see any of that here - both word embeddings and PCA find existing patterns in the data and this paper primarily hopes that they work out with political-economic dimensions. I think there is a missed opportunity to include some qualitative analysis of the speeches, for example, reading some of the speeches that are coded in one direction or another to see if you agree with how they are being dimensionalized. This might give insight into why it is not working as intended as well.
+
+As for the writing and content, I would primarily suggest reframing the discussion as a journal methods section rather than a 'read along with the code' style blog post. I'm a fan of the latter but I think, particularly once the code is removed, it will read more cleanly to describe the processes you took to the reader rather than having them interpret it primarily from the code itself. On the finer points, there are a few sections which can be more clearly analyzed - here are some suggestions on further topics of discussion. First, I am somewhat confused on why, to get at the top words in each principal component, you predict based on the embedding and the vocab list. If you could explain this more clearly as to how this works it would help to understand what is happening here. I would also recommend including a more fleshed out discussion of your results. In your two regressions at the end you find that labor party speeches are more likely to be higher on dim1 and lower on dim2, and you get into what that might mean a little bit. I think a more thorough discussion here would be interesting and would help to clarify the results. Even though these aren't the hypotheses you set out to test, you can provide a more substantive analysis of the results as they stand. 
+
+P.S. Give your paper a name!
