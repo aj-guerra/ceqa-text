@@ -1,0 +1,655 @@
+---
+title: "The Effects of Consultant Use on Environmental Justice Planning"
+author: "Aaron Guerra"
+format: revealjs
+execute:
+  cache: true
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+
+# load packages, dictionary, data
+
+library(tidyverse)
+library(quanteda)
+library(quanteda.textstats)
+library(topicmodels)
+library(tidytext)
+library(tidycensus)
+library(stargazer)
+library(betareg)
+library(broom)
+library(gt)
+
+ej_dictionary <- dictionary(list(
+  identifying_disadvantaged_communities = c(
+    "disadvantaged communit*", "disproprtionat* affect*",
+    "pollution* burden*", "pollution*",
+    "hazard*", "health effect*",
+    "exposure*", "environmental degradation*",
+    "CalEnviroScreen", "pollution burden*", "census tract*", "screen*", "community-specific data",
+    "vulnera*", 
+    "household income*","median income", "MHI", "income limit*", 
+    "health risk factor*", "environmental burden*", 
+    "health risk*", "community needs",
+    "historical trend*", 
+    "fringe communit*", "unincorporated communit*", 
+    "equit*", "inequit*", 
+    "low-income area*", "low-income population*", "sensitive population*",
+    "minority population*",
+    "racial minorit*", "communit* of color", 
+    "tribal government*", "tribal culture*", 
+    "environmental racism", "redlining", "disinvestment*", "segregat*", "systemic oppression"
+  ),
+  reducing_pollution_exposure_air_quality = c(
+    "pollut*", "pollution exposure*", "reduce exposure*", "reduc* pollut*",
+    "unique health risk*", "compounded health risk*", "health hazard*", 
+    "air qualit*", 
+    "mobile source*", "stationary source*", 
+    "emission*", 
+    "fossil fuel combustion",
+    "vehicle miles traveled", "VMT", "mode shift", "active transportation", "zero-emission", "electric fleet*", 
+    "sensitive land use*", 
+    "high-volume roadway*", "major arterial*", "freeway*", "truck route*",
+    "freight-handling facilit*", "manufacturing facilit*", "industrial air pollution*", 
+    "mitigation procedure*", "mitigation*", "low-carbon technolog*", 
+    "zero-emission vehicle*", "ZEV", 
+    "solar generation", "wind generation", 
+    "indoor filtration system*", "polluting substance*", "water qualit*", "soil pollution*",
+    "noise",
+    "asthma", "birth defect*", "cancer*", "heart disease*", "neurologic disorder*", "reproductive disorder*", 
+    "involuntary exposure*", "second-hand smoke", "third-hand smoke", "tobacco smoke", "smoke-free zone*","tobacco outlet*",
+    "pesticide*", "integrated pest management", "regenerative agriculture",
+    "air quality management district*", "aqmd", "carb", "california air resources board", 
+    "community air protection program*", "ab 617", "community emissions reduction program*",
+    "air quality monitoring", "emissions control limit*", "emissions data", 
+    "toxic hot spot*",
+    "transitional land use*", "industrial facilit*", 
+    "hazardous facilit*", "hazardous waste", "solid waste site*", "brownfield development",
+    "remediation", "cleanup", 
+    "near-roadway siting",
+    "diesel PM", "toxic air contaminant*", "ozone", "pm 2.5",
+    "groundwater threat*", "water contaminant", 
+    "impaired water bod*", "toxic cleanup site*", 
+    "traffic densit*"
+  ),
+  promoting_public_facilities = c(
+    "public facilit*", "public improvement*", "public service*",
+    "community center*", "librar*", "public transit", "recreation facilit*",
+    "safe drinking water", "wastewater service*", 
+    "active transportation infrastructure","flood control", "water drainage", 
+    "health care service*", "hospital*", "health clinic*",
+    "broadband access", "internet access", 
+    "disaster preparedness", "recovery capacit*",
+    "amenit*", "park", "parks", "trail*", "sidewalk*", "public transit"
+  ),
+  promoting_food_access = c(
+    "food access", "healthy food*", "affordable food*", "food desert*",
+    "food insecur*", "nutrition", "obesit*", 
+    "food choice*", "food system*",
+    "grocery store*", "farmer* market*", 
+    "community garden*", "urban farm*", "convenience store*",
+    "fresh produce", "food procurement polic*", 
+    "food production", "food distribution", "food processing", "food consumption", 
+    "waste disposal", 
+    "locally grown food*", "farm to market",
+    "CalFresh", 
+    "food recovery program*", "SB 1383", 
+    "fresh fruit*", "fresh vegetable*",
+    "self-reported food insecurit*"
+  ),
+  promoting_safe_sanitary_homes = c(
+    "safe home*", "sanitary home*", "promot* safe and sanitary home*", 
+    "housing location*", "housing qualit*", "housing affordabilit*", "housing stabilit*",
+    "lower income household*", "special needs household*", 
+    "Regional Housing Need Allocation", "RHNA",
+    "fair share planning", 
+    "accessible transit", 
+    "pest infestation", "water intrusion", "mold", "poor insulation",
+    "exposure to toxin*", "lead exposure", "lead based paint",
+    "second-hand smoke", "third-hand smoke",
+    "weatherize home*", "modernize home*",
+    "green building practice*", "sustainable building practice*", 
+    "new housing construction", "major retrofit*", 
+    "affordable housing", "unstable living condition*", "housing price*", 
+    "household occupancy rate*", "overcrowded living condition*",
+    "rising rent*", "displacement*","marginally housed", "homelessness", 
+    "renter protection",
+    "preserving affordable housing", "housing cost burden", "homelessness data",
+    "household characteristic*"
+  ),
+  promoting_physical_activity = c(
+    "physical activit*", "physical inactivit*", 
+    "chronic disease*",
+    "obesit*", "diabetes", "high blood pressure", "high cholesterol", "heart disease*",
+    "mental health", "well-being",
+    "park", "parks", "recreation", "open space", "recreational facilit*",
+    "park poor", "park improvement*", 
+    "no smoking polic*", 
+    "joint use agreement*", "shared use agreement*",
+    "active transportation", 
+    "walking", "biking", "daily routine*", "perform errand*",
+    "walking to work", "biking to work", "walking to school", "biking to school",
+    "active design guideline*",
+    "connected bike route*", "pedestrian on-street route*", 
+    "infill development", "Complete Street*",
+    "multimodal transit", "interconnected transit", 
+    "first mile polic*", "last mile polic*",
+    "covered rest area*", "shade", "age friendly seating", "bike storage", "trail network*",
+    "Sustainable Communities and Climate Protection Act", "SB 375",
+    "Active Transportation Program", "Safe Routes to School", "SRTS", 
+    "safety of route*", "aging in place",
+    "naturally occurring retirement communit*", "NORC",
+    "walkable communit*",
+    "park access", "unintentional injur* involving pedestrian*",
+    "crash data", "walk trip* per capita", "bike trip* per capita",
+    "children who walk* to school", "children who bike* to school", "children who roll* to school",
+    "walk map*", "bike map*",
+    "perception of safet*"
+  ),
+  reducing_unique_compounded_health_risks = c(
+    "unique health risk*", "compounded health risk*",
+    "reduce health risk*", 
+    "climate change", "climate vulnerabilit*", "climate adaptation", 
+    "adaptation", "resilience", "resiliency",
+    "flooding", "drought", "wildfire*", "extreme heat", 
+    "greenhouse gas emission*", "GHG", "vulnerable communit*",
+    "temperature record*", "heat stroke", "heat-related complication*", "heat island*", "cooling center*",
+    "green infrastructure", "urban forestry", "urban greening", "cool surface*", "cool roof*",
+    "green roof*", "tree canop*", 
+    "carbon capture", 
+    "energy efficienc*",
+    "drought mitigation", "stagnant water", "mosquito reproduction", "insect-borne disease*",
+    "dengue", "yellow fever", 
+    "sea level rise", 
+    "fire hazard severity zone*", "FHSZ",
+    "precipitation change*", "snowpack loss", "extreme precipitation event*",
+    "extended drought scenario*", "wildfire threat*", "air conditioning access"
+  ),
+  promoting_civic_engagement = c(
+    "civic engagement", 
+    "public decision-making process*", "public participation",
+    "community engagement", "community vision*", 
+    "local histor*", "relationship*", "trust", "rebuild trust",
+    "community-based organization*", "CBO*", 
+    "advocacy group*", 
+    "trusted leader*",
+    "barrier* to participation", "time conflict*",
+    "meeting format*", "planning process*", "ongoing engagement",
+    "general plan implementation", 
+    "local neighborhood-level specific plan*", 
+    "revitalization effort*", 
+    "community-facing program*", 
+    "community input", "community buy-in", "community support",
+    "stakeholder communit*", "community advisory committee"
+  )
+  ))
+
+plan_corpus <- readRDS("plans_corpus_doc.rds") 
+
+plan_metadata <- read_csv('plans_metadata.csv') %>% 
+  mutate(consultant_name = ifelse(consultant_name == "Unknown",
+                                  NA_character_,
+                                  consultant_name),
+         consultant_binary = ifelse(is.na(consultant_name), 0, 1),
+         consultant_list = str_split(consultant_name, pattern = ";\\s*")
+         )
+
+docvars(plan_corpus) <- plan_metadata
+
+plan_corpus <- corpus_subset(plan_corpus, (plan_type == "EJE" | plan_type == "GP" | plan_type == "HE"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+# generate full document metadata
+
+ca_data <- get_acs(geography='place',
+                       state='California',
+                       variables = c('B01003_001', #population
+                                     'B19013_001' # mhi
+                                     )) %>% 
+  filter(!str_detect(NAME, "Burbank CDP|El Cerrito CDP|Greenfield CDP|Live Oak CDP|Mountain View CDP|Rolling Hills CDP"))
+
+census_data <- ca_data %>% 
+  mutate(city_name = str_remove(NAME, " (city|CDP), California")) %>% 
+  select(-c(NAME, moe, GEOID)) %>%
+  pivot_wider(names_from = variable,
+              values_from = estimate) %>% 
+  rename(population = B01003_001,
+         mhi = B19013_001) 
+
+docvar_df <- docvars(plan_corpus) %>% 
+  cbind(docnames(plan_corpus)) %>% 
+  select(`docnames(plan_corpus)`, everything()) %>% 
+  rename(doc_id = `docnames(plan_corpus)`) %>% 
+  left_join(census_data, by = "city_name")  %>% 
+  mutate(
+    pop_bin = as.factor(cut(population, 
+                  breaks = quantile(population, probs = seq(0, 1, length.out = 5), na.rm = TRUE), 
+                  include.lowest = TRUE, 
+                  labels = FALSE)),
+    mhi_bin = as.factor(cut(mhi, 
+                  breaks = quantile(mhi, probs = seq(0, 1, length.out = 5), na.rm = TRUE), 
+                  include.lowest = TRUE, 
+                  labels = FALSE)),
+    single_consultant = str_split_i(consultant_name, ';', 1),
+    n_consultants = ifelse(is.na(consultant_name),
+                           0,
+                           str_count(consultant_name, ";") + 1)
+  ) %>% 
+  tibble()
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| output: false
+
+# generate tokens and then dfm and then final df
+
+plan_tokens <- tokens(plan_corpus) %>% 
+  tokens_tolower() %>%
+  tokens(split_hyphens = TRUE,
+         remove_punct = TRUE,
+         remove_symbols = TRUE,
+         remove_numbers = TRUE) 
+
+ej_tokens <- plan_tokens %>% 
+  tokens_compound(ej_dictionary, 
+                  valuetype = "glob", 
+                  case_insensitive = TRUE,
+                  join=FALSE) %>% 
+  tokens_keep(ej_dictionary,
+             valuetype='glob')
+  
+ej_dfm <- ej_tokens %>% 
+  dfm() 
+
+docvars(ej_dfm) <- docvar_df 
+
+ej_dfm_tfidf <- ej_dfm %>% 
+  dfm_tfidf() 
+
+ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine'))) %>% 
+  left_join(docvar_df, 
+            by = c("document1" = "doc_id")) %>% 
+  left_join(docvar_df, 
+            by = c("document2" = "doc_id")) %>% 
+  mutate(same_year = as.factor(ifelse(plan_year.x == plan_year.y, 1, 0)),
+         same_pop = as.factor(ifelse(pop_bin.x == pop_bin.y, 1, 0)),
+         same_mhi = as.factor(ifelse(mhi_bin.x == mhi_bin.y, 1, 0)),
+         both_used_consultant = as.factor(ifelse(consultant_binary.x == 1 & consultant_binary.y == 1, 1, 0)),
+         any_shared_consultant = as.factor(
+           mapply(function(a, b) {
+             if (is.null(a) || is.null(b) || (all(is.na(a)) & all(is.na(b)))) {
+               0
+               } else {
+                 as.integer(length(intersect(a, b)) > 0)
+                 }
+             }, consultant_list.x, consultant_list.y)),
+         n_shared_consultants = mapply(function(a, b) {
+           if (
+             (is.null(a) || all(is.na(a)) || identical(a, "NA")) &&
+             (is.null(b) || all(is.na(b)) || identical(b, "NA"))
+             ) {
+             0
+             } else if (is.null(a) || all(is.na(a)) || identical(a, "NA") ||
+                        is.null(b) || all(is.na(b)) || identical(b, "NA")) {
+               0
+               } else {
+                 length(intersect(a, b))
+                 }
+           }, consultant_list.x, consultant_list.y),
+         both_no_consultant = as.factor(ifelse(consultant_binary.x == 0 & consultant_binary.y == 0, 1, 0)),
+         same_plan_type = as.factor(ifelse(plan_type.x == plan_type.y, 1, 0)),
+         both_eje = as.factor(ifelse(plan_type.x == "EJE" & plan_type.y == "EJE", 1, 0)),
+         both_gp = as.factor(ifelse(plan_type.x == "GP" & plan_type.y == "GP", 1, 0)),
+         both_he = as.factor(ifelse(plan_type.x == "HE" & plan_type.y == "HE", 1, 0)),
+         length_dif = abs(plan_length.x - plan_length.y)
+         ) 
+
+```
+
+## SB1000 and General Plans
+
+-  SB1000 (2016): Requires California city general plans to address environmental justice (EJ).
+-  General plans structure medium-term planning and include elements like housing, safety, and land use.
+- Cities often hire environmental consultants to support writing these plans.
+
+## What does SB1000 mandate EJ elements address?
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- Identifying disadvantaged communities (DACs)
+- Reducing pollution exposure
+- Reducing other health risks
+:::
+
+::: {.column width="50%"}
+**Promoting in DACs**:
+
+- Public facilities
+- Food access
+- Safe and sanitary homes
+- Physical activity
+- Civic engagement
+:::
+
+
+::::
+  
+# Research Gap: 
+
+How does the use of consultants affect EJ plan development and similarity?
+
+
+## Hypotheses
+
+- **H1:** Two plans which both utilized the same consultant in the planning process will have an increased cosine similarity compared to other plan-comparisons.
+- **H2:** Two plans which both did not use a consultant in the planning process will have a decreased cosine similarity compared to other plan-comparisons.
+
+---
+
+## Methods: Preprocessing Steps
+
+1. **Data Source:** 
+
+General Plan Database Mapping Tool (plansearch.caes.ucdavis.edu)
+
+2. **Document Collection:** 
+
+ - 340 documents from 280 cities
+ - Manually downloaded and tagged by type (General Plan, Housing Element, EJ Element)
+
+---
+
+## Methods: Preprocessing Steps
+
+3. **Dictionary Creation:**
+    - Based on 8 topics in statutory EJ requirements 
+    - Guided by CA OPR guidelines vocabulary
+    - Identified 353 EJ-related tokens 
+      - (can be multi-word, non-mutually exclusive)
+    
+---
+
+## Methods: Preprocessing Steps
+
+4. **TF-IDF Weighting:**
+    - Transforms term frequency to relative frequency.
+    - These documents talk about a lot of things, EJ makes up only a portion
+    - Terms that are rare are more interesting (and probably more EJ related)
+    - Accounts for varying document lengths
+
+---
+
+## Non-Weighted Term Frequency {.smaller}
+
+```{r}
+#| echo: false
+#| results: asis
+
+freq_count <- ej_dfm %>%
+  textstat_frequency() %>%
+  slice_max(order_by = frequency, n = 30) %>%
+  arrange(group, desc(frequency)) 
+
+freq_tfidf <- ej_dfm_tfidf %>%
+  textstat_frequency(force=TRUE) %>%
+  slice_max(order_by = frequency, n = 30) %>%
+  arrange(group, desc(frequency)) 
+
+all_terms <- data.frame(term = c(freq_count$feature, freq_tfidf$feature))
+
+appear_in_both <- count(all_terms, term) %>% 
+  filter(n>1) %>% 
+  pull(term)
+
+freq_count <- freq_count %>% 
+  mutate(appear_in_both = as.factor(ifelse(feature %in% appear_in_both, 1, 0)) )
+
+freq_tfidf <- freq_tfidf %>% 
+  mutate(appear_in_both = as.factor(ifelse(feature %in% appear_in_both, 1, 0)) )
+
+freq_count %>%
+  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
+  geom_col(aes(fill=appear_in_both)) +
+  coord_flip() +
+  labs(x = "Feature", y = "Count Frequency") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none')
+
+
+```
+
+(blue bars appear in both)
+
+## TF-IDF Weighted Term Frequency {.smaller}
+
+```{r}
+#| echo: false
+#| results: asis
+
+freq_tfidf %>% 
+  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
+  geom_col(aes(fill=appear_in_both)) +
+  coord_flip() +
+  labs(x = "Feature", y = "TF-IDF Weighted Frequency") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none')
+
+```
+
+(blue bars appear in both)
+
+## Dependent Variable
+
+**Cosine Similarity**
+
+- Unit of analysis is plan dyads
+- Calculated between each pair of documents (58,653 pairs)
+
+```{r}
+hist(ej_sim_df$cosine,
+     main = "Cosine Similarity Distribution",
+     xlab = "Cosine Similarity",
+     ylab = "Frequency",
+     col = "lightblue",
+     breaks = 50)
+```
+
+##  Independent Variables 
+
+- H1: Binary dummy for if two plans used at least one consultant in common
+- H2: Binary dummy for if two plans both did not refer to any consultant
+
+```{r}
+count(ej_sim_df, any_shared_consultant, both_no_consultant) %>% 
+  gt()
+```
+    
+## Control Variables 
+
+- **Temporal:** Binary dummy if plans written in the same year (plans from 1998-2024).
+- **Socioeconomic (2020 ACS):**
+    - Population and Median Household Income (MHI).
+    - Broken into quartiles; dummy variable if quartile level matches.
+- **Document Type:** Three dummy variables for document type matches (Both EJ Elements, Both General Plans, Both Housing Elements).
+
+## H1 Results: Shared Consultant Use
+
+```{r}
+#| echo: false
+#| results: asis
+
+mod_1a <- betareg(cosine ~  any_shared_consultant + same_year + same_pop + same_mhi + both_eje + both_gp + both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+mod_1b <- betareg(cosine ~  both_no_consultant + same_year + same_pop + same_mhi + both_eje + both_gp + both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+mod_2a <- betareg(cosine ~ same_year + same_pop + same_mhi + both_eje + any_shared_consultant*both_gp + any_shared_consultant*both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+mod_2b <- betareg(cosine ~ same_year + same_pop + same_mhi + both_no_consultant*both_eje + both_no_consultant*both_gp + both_no_consultant*both_he,
+                 link='logit',
+                 data = ej_sim_df) 
+
+sjPlot::plot_models(mod_1a, mod_2a,
+                    rm.terms = c("same_year1", "same_pop1", "same_mhi1"),
+                    m.labels = c("No Interaction", "Interaction"))
+
+```
+
+## H2 Results: No Consultant Use
+
+```{r}
+
+sjPlot::plot_models(mod_1b, mod_2b,
+                    rm.terms = c("same_year1", "same_pop1", "same_mhi1"),
+                    m.labels = c("No Interaction", "Interaction"))
+
+```
+
+# What is Different About Consultant-Written Plans?
+
+## Words ONLY by Consultants or Non-Consultants {.smaller}
+
+```{r}
+#| echo: false
+#| results: asis
+
+noncon_words <- textstat_frequency(ej_dfm_tfidf,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==0) %>%
+  # filter(frequency > 10) %>% 
+  filter(docfreq > 5) %>%
+  mutate(freq_std = frequency/docfreq,
+         group='Consultant Not Used') %>% 
+  tibble()
+
+con_words <- textstat_frequency(ej_dfm_tfidf,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==1) %>%
+  # filter(frequency > 10) %>%
+  filter(docfreq > 12) %>%
+  mutate(freq_std = frequency/docfreq,
+         group = 'Consultant Used') %>% 
+  tibble()
+
+con_only_words <- con_words %>% 
+  anti_join(noncon_words, by = "feature") %>% 
+  arrange(desc(freq_std)) %>% 
+  mutate(index=seq(1, nrow(.)))
+
+max(con_only_words$index) -> start_at
+
+noncon_only_words <- noncon_words %>%
+  anti_join(con_words, by = "feature") %>% 
+  arrange(freq_std) %>% 
+  mutate(index=seq(start_at+1, start_at+nrow(.)))
+
+rbind(con_only_words, noncon_only_words) %>% 
+  ggplot(aes(x = reorder(feature, desc(index)), y = freq_std)) +
+  geom_col(aes(fill=group)) +
+  scale_fill_manual(values = c("Consultant Used" = "#1f77b4", "Consultant Not Used" = "#ff7f0e")) +
+  coord_flip() +
+  labs(x = "Term", y = "Relative Frequency") +
+  theme_minimal()
+```
+
+Words that show up in at least 5% of each corpus subset and not in the other corpus subset.
+
+## Relative Theme Use 
+
+```{r}
+ej_dfm_dict <- ej_dfm_tfidf %>% 
+  dfm_lookup(ej_dictionary, 
+             valuetype = "glob", 
+             case_insensitive = TRUE) 
+
+noncon_agg <- textstat_frequency(ej_dfm_dict,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==0) %>%
+  mutate(freq_std = frequency/docfreq) %>% 
+  tibble()
+
+con_agg <- textstat_frequency(ej_dfm_dict,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==1) %>%
+  mutate(freq_std = frequency/docfreq) %>% 
+  tibble()
+
+inner_join(noncon_agg, con_agg, by = "feature", suffix = c(".noncon", ".con")) %>%
+  select(feature, freq_std.noncon, freq_std.con) %>%
+  pivot_longer(
+    cols = starts_with("freq_std"),
+    names_to = "Group",
+    values_to = "freq_std"
+  ) %>%
+  mutate(Group = recode(Group,
+                       "freq_std.noncon" = "Consultant Not Used",
+                       "freq_std.con" = "Consultant Used")) %>%
+  ggplot(aes(x = reorder(feature, freq_std), y = freq_std, fill = Group)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("Consultant Used" = "#1f77b4", "Consultant Not Used" = "#ff7f0e")) +
+  coord_flip() +
+  labs(x = "Term", y = "Relative Frequency", fill = "Group") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+## Recap
+
+1. **H1 Supported**: Plans with shared consultants have higher similarity.
+2. **H2 Supported**: Plans without consultants have lower similarity.
+3. **Consultant-Written Plans:**
+   - Have *different* unique vocabulary
+   - Discuss EJ themes with more frequency
+
+## Why the Difference? {.smaller}
+
+1.  **Actual Compliance/Greater Discussion:** 
+
+Plans by consultants discuss EJ topics at a greater rate or use EJ-related terms more.
+    
+2.  **Drawing on State-Approved Vocabulary:**
+ - EJ term list for analysis was drawn from state-level guidelines.
+ - Consultants may more heavily use state-approved EJ words/phrases.
+ - Non-consultant plans might not address EJ less, but *differently*, using vocabulary not explicitly from state recommendations.
+
+## Next Steps & Further Research {.smaller}
+
+- Consultants play a significant role in the EJ planning process.
+- The *how* and *what* consultants do differently is not fully understood.
+- **Future Research Directions:**
+    - Develop hypotheses based on literature about consultant actions, assigned tasks, and completion methods.
+    - Move from term-based to topic-based document models (measure semantic meaning).
+    - Employ a more atomic view of documents to compare if, when, and where topics are discussed.
+
+# Thank You!
+
+Questions?
+
+
+
+
+

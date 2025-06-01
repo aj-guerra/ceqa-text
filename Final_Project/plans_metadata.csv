@@ -268,7 +268,6 @@ plan_id,file_name,city_name,plan_year,plan_type,plan_length,consultant_binary,co
 268,San_Francisco_2015.pdf,San Francisco,2015,HE,284,0,
 269,San_Francisco_2023.pdf,San Francisco,2023,HE,183,0,
 270,San_Jacinto_2022.pdf,San Jacinto,2022,HE,520,1,De Novo Planning Group
-271,San_Jose_2017.pdf,San Jose,2017,GP,508,1,Unknown
 272,San_Jose_2021.pdf,San Jose,2021,GP,511,1,Unknown
 273,San_Jose_2024.pdf,San Jose,2024,HE,1288,1,Tolemi; Community Planning Collaborative; Lawyers' Committee for Civil Rights Under Law
 274,San_Juan_Capistrano_2022.pdf,San Juan Capistrano,2022,EJE,413,0,
@@ -293,7 +292,6 @@ plan_id,file_name,city_name,plan_year,plan_type,plan_length,consultant_binary,co
 293,Santa_Paula_2020.pdf,Santa Paula,2020,GP,270,0,
 294,Santa_Paula_2022.pdf,Santa Paula,2022,HE,188,1,JHD Planning
 295,Santa_Rosa_2023.pdf,Santa Rosa,2023,HE,316,1,Placeworks
-296,Santee_2021.pdf,Santee,2021,HE,180,0,
 297,Santee_2022.pdf,Santee,2022,HE,185,0,
 298,Sausalito_2021.pdf,Sausalito,2021,GP,450,1,M-Group; FirstCarbon Solutions; Economic and Planning Systems; Parisi Transportation Consultants; BKF Engineers; Mott Macdonald
 299,Sausalito_2023.pdf,Sausalito,2023,HE,289,1,De Novo Planning Group

@@ -39,6 +39,7 @@ for (i in seq_along(pdf_files)) {
   
   # metadata
   file_name <- basename(file)
+  print(paste("Processing file:", file_name))
   city_name <- str_sub(str_replace_all(str_remove(file_name, 
                                           str_split_i(file_name, 
                                                       "_",
