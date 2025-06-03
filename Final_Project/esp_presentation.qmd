@@ -1,9 +1,13 @@
 ---
 title: "The Effects of Consultant Use on Environmental Justice Planning"
 author: "Aaron Guerra"
-format: revealjs
+format: 
+  revealjs:
+    theme: custom-moon.scss
 execute:
   cache: true
+bibliography: references.bib
+suppress-bibliography: true
 ---
 
 ```{r}
@@ -212,7 +216,9 @@ plan_corpus <- corpus_subset(plan_corpus, (plan_type == "EJE" | plan_type == "GP
 ca_data <- get_acs(geography='place',
                        state='California',
                        variables = c('B01003_001', #population
-                                     'B19013_001' # mhi
+                                     'B19013_001', # mhi
+                                     'B03001_003', # latino pop
+                                     'B02001_003' # black pop
                                      )) %>% 
   filter(!str_detect(NAME, "Burbank CDP|El Cerrito CDP|Greenfield CDP|Live Oak CDP|Mountain View CDP|Rolling Hills CDP"))
 
@@ -222,7 +228,11 @@ census_data <- ca_data %>%
   pivot_wider(names_from = variable,
               values_from = estimate) %>% 
   rename(population = B01003_001,
-         mhi = B19013_001) 
+         mhi = B19013_001,
+         latino_pop = B03001_003,
+         black_pop = B02001_003) %>%
+  mutate(per_latino = latino_pop / population,
+         per_black = black_pop / population)
 
 docvar_df <- docvars(plan_corpus) %>% 
   cbind(docnames(plan_corpus)) %>% 
@@ -250,7 +260,7 @@ docvar_df <- docvars(plan_corpus) %>%
 #| echo: false
 #| warning: false
 #| output: false
-
+#| cache: true
 # generate tokens and then dfm and then final df
 
 plan_tokens <- tokens(plan_corpus) %>% 
@@ -318,172 +328,100 @@ ej_sim_df <- tibble(as.data.frame(textstat_simil(ej_dfm_tfidf,  method='cosine')
 
 ## SB1000 and General Plans
 
--  SB1000 (2016): Requires California city general plans to address environmental justice (EJ).
--  General plans structure medium-term planning and include elements like housing, safety, and land use.
-- Cities often hire environmental consultants to support writing these plans.
+-   SB1000 (2016): Requires California city general plans to address environmental justice (EJ).
+-   General plans structure medium-term planning and include elements like housing, safety, and land use.
+-   Cities often hire environmental consultants to support writing these plans.
 
 ## What does SB1000 mandate EJ elements address?
 
-
-:::: {.columns}
-
+::: columns
 ::: {.column width="50%"}
-- Identifying disadvantaged communities (DACs)
-- Reducing pollution exposure
-- Reducing other health risks
+-   Identifying disadvantaged communities (DACs)
+-   Reducing pollution exposure
+-   Reducing other health risks
 :::
 
 ::: {.column width="50%"}
 **Promoting in DACs**:
 
-- Public facilities
-- Food access
-- Safe and sanitary homes
-- Physical activity
-- Civic engagement
+-   Public facilities
+-   Food access
+-   Safe and sanitary homes
+-   Physical activity
+-   Civic engagement
+:::
 :::
 
+# Brief Literature Review
 
-::::
-  
-# Research Gap: 
+## Policy Diffusion, Transfer, and Mobilities
 
-How does the use of consultants affect EJ plan development and similarity?
+**Central Question**: Who transfers policies?
 
+-   Consultants play a role
+-   Consultants standardize policy language
 
-## Hypotheses
+[@mccann2011; @kirkpatrick2023]
 
-- **H1:** Two plans which both utilized the same consultant in the planning process will have an increased cosine similarity compared to other plan-comparisons.
-- **H2:** Two plans which both did not use a consultant in the planning process will have a decreased cosine similarity compared to other plan-comparisons.
+## Environmental Justice and Consultants
 
-## Methods: Preprocessing Steps
+-   "There is a danger that consultants offer 'technocratic solutions to political problems'" [@kantola2011]
+-   (Critical) EJ scholars are wary of technocratic/neoliberal approaches [@ylönen2019]
 
-1. **Data Source:** 
+**Tension**: How do consultant approaches affect EJ planning, given differing perspectives?
 
-General Plan Database Mapping Tool (plansearch.caes.ucdavis.edu)
+# Hypotheses
 
-2. **Document Collection:** 
+## Hypothesis 1
 
- - 340 documents from 280 cities
- - Manually downloaded and tagged by type (General Plan, Housing Element, EJ Element)
+> H1a: Two plans which both utilized the same consultant in the planning process will have an increased cosine similarity compared to other plan-comparisons.
 
-## Methods: Preprocessing Steps
+> H1b: Two plans which both did not use a consultant in the planning process will have an decreased cosine similarity compared to other plan-comparisons.
 
-3. **Dictionary Creation:**
-    - Based on 8 topics in statutory EJ requirements 
-    - Guided by CA OPR guidelines vocabulary
-    - Identified 353 EJ-related tokens 
-      - (can be multi-word, non-mutually exclusive)
+## Hypothesis 2
 
-## Methods: Preprocessing Steps
+> H2a: Consultant-written plans will advance EJ goals less than plans written without consultants.
 
-4. **TF-IDF Weighting:**
-    - Transforms term frequency to relative frequency.
-    - These documents talk about a lot of things, EJ makes up only a portion
-    - Terms that are rare are more interesting (and probably more EJ related)
-    - Accounts for varying document lengths
+> H2b: Consultants will differentially promote forms of EJ, such that procedural justice is advanced more than distributive justice, which is advanced more than recognitional justice.
 
+## Hypothesis 3
 
-## Non-Weighted Term Frequency {.smaller}
+> H3a: Consultant-written plans will use more technical language than plans written without consultants.
+
+> H3b: Consultant-written plans will use less experiential language than plans written without consultants.
+
+## Methods: Preprocessing Steps {.smaller}
+
+1.  **Data Source:**
+    -   General Plan Database Mapping Tool (plansearch.caes.ucdavis.edu)
+2.  **Document Collection:**
+    -   340 documents from 280 cities
+    -   Manually downloaded and tagged by type (General Plan, Housing Element, EJ Element)
+
+## Methods: Preprocessing Steps {.smaller}
+
+3.  **Dictionary Creation:**
+    -   Based on 8 topics in statutory EJ requirements
+    -   Guided by CA OPR guidelines vocabulary
+    -   Identified 353 EJ-related tokens
+        -   (can be multi-word, non-mutually exclusive)
+4.  **TF-IDF Weighting:**
+    -   Transforms term frequency to relative frequency.
+    -   These documents talk about a lot of things, EJ makes up only a portion
+    -   Terms that are rare are more interesting (and probably more EJ related)
+    -   Accounts for varying document lengths
+
+## Hypothesis 1a
+
+Two plans which both utilized the same consultant in the planning process will have an increased cosine similarity compared to other plan-comparisons.
 
 ```{r}
+#| fig-cap: "Similarity for Shared Consultant Use"
 #| echo: false
 #| results: asis
 
-freq_count <- ej_dfm %>%
-  textstat_frequency() %>%
-  slice_max(order_by = frequency, n = 30) %>%
-  arrange(group, desc(frequency)) 
+library(sjPlot)
 
-freq_tfidf <- ej_dfm_tfidf %>%
-  textstat_frequency(force=TRUE) %>%
-  slice_max(order_by = frequency, n = 30) %>%
-  arrange(group, desc(frequency)) 
-
-all_terms <- data.frame(term = c(freq_count$feature, freq_tfidf$feature))
-
-appear_in_both <- count(all_terms, term) %>% 
-  filter(n>1) %>% 
-  pull(term)
-
-freq_count <- freq_count %>% 
-  mutate(appear_in_both = as.factor(ifelse(feature %in% appear_in_both, 1, 0)) )
-
-freq_tfidf <- freq_tfidf %>% 
-  mutate(appear_in_both = as.factor(ifelse(feature %in% appear_in_both, 1, 0)) )
-
-freq_count %>%
-  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
-  geom_col(aes(fill=appear_in_both)) +
-  coord_flip() +
-  labs(x = "Feature", y = "Count Frequency") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = 'none')
-
-
-```
-
-(blue bars appear in both)
-
-## TF-IDF Weighted Term Frequency {.smaller}
-
-```{r}
-#| echo: false
-#| results: asis
-
-freq_tfidf %>% 
-  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
-  geom_col(aes(fill=appear_in_both)) +
-  coord_flip() +
-  labs(x = "Feature", y = "TF-IDF Weighted Frequency") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = 'none')
-
-```
-
-(blue bars appear in both)
-
-## Dependent Variable
-
-**Cosine Similarity**
-
-- Unit of analysis is plan dyads
-- Calculated between each pair of documents (58,653 pairs)
-
-```{r}
-hist(ej_sim_df$cosine,
-     main = "Cosine Similarity Distribution",
-     xlab = "Cosine Similarity",
-     ylab = "Frequency",
-     col = "lightblue",
-     breaks = 50)
-```
-
-##  Independent Variables 
-
-- H1: Binary dummy for if two plans used at least one consultant in common
-- H2: Binary dummy for if two plans both did not refer to any consultant
-
-```{r}
-count(ej_sim_df, any_shared_consultant, both_no_consultant) %>% 
-  gt()
-```
-    
-## Control Variables 
-
-- **Temporal:** Binary dummy if plans written in the same year (plans from 1998-2024).
-- **Socioeconomic (2020 ACS):**
-    - Population and Median Household Income (MHI).
-    - Broken into quartiles; dummy variable if quartile level matches.
-- **Document Type:** Three dummy variables for document type matches (Both EJ Elements, Both General Plans, Both Housing Elements).
-
-## H1 Results: Shared Consultant Use
-
-```{r}
-#| echo: false
-#| results: asis
 
 mod_1a <- betareg(cosine ~  any_shared_consultant + same_year + same_pop + same_mhi + both_eje + both_gp + both_he,
                  link='logit',
@@ -504,74 +442,32 @@ mod_2b <- betareg(cosine ~ same_year + same_pop + same_mhi + both_no_consultant*
 sjPlot::plot_models(mod_1a, mod_2a,
                     rm.terms = c("same_year1", "same_pop1", "same_mhi1"),
                     m.labels = c("No Interaction", "Interaction"))
-
 ```
 
-## H2 Results: No Consultant Use
+## Hypothesis 1b
+
+Two plans which both did not use a consultant in the planning process will have an decreased cosine similarity compared to other plan-comparisons.
 
 ```{r}
-
+#| fig-cap: "Similarity for No Consultant Use"
 sjPlot::plot_models(mod_1b, mod_2b,
                     rm.terms = c("same_year1", "same_pop1", "same_mhi1"),
                     m.labels = c("No Interaction", "Interaction"))
 
 ```
 
-# What is Different About Consultant-Written Plans?
+## Hypothesis 2a 
 
-## Words ONLY by Consultants or Non-Consultants {.smaller}
+Consultant-written plans will advance EJ goals less than plans written without consultants.
 
 ```{r}
+#| fig-cap: "EJ Themes used more by Consultants and Non-Consultants"
 #| echo: false
+#| warning: false
 #| results: asis
 
-noncon_words <- textstat_frequency(ej_dfm_tfidf,
-                    groups=consultant_binary,
-                    force=TRUE) %>% 
-  filter(group==0) %>%
-  # filter(frequency > 10) %>% 
-  filter(docfreq > 5) %>%
-  mutate(freq_std = frequency/docfreq,
-         group='Consultant Not Used') %>% 
-  tibble()
 
-con_words <- textstat_frequency(ej_dfm_tfidf,
-                    groups=consultant_binary,
-                    force=TRUE) %>% 
-  filter(group==1) %>%
-  # filter(frequency > 10) %>%
-  filter(docfreq > 12) %>%
-  mutate(freq_std = frequency/docfreq,
-         group = 'Consultant Used') %>% 
-  tibble()
-
-con_only_words <- con_words %>% 
-  anti_join(noncon_words, by = "feature") %>% 
-  arrange(desc(freq_std)) %>% 
-  mutate(index=seq(1, nrow(.)))
-
-max(con_only_words$index) -> start_at
-
-noncon_only_words <- noncon_words %>%
-  anti_join(con_words, by = "feature") %>% 
-  arrange(freq_std) %>% 
-  mutate(index=seq(start_at+1, start_at+nrow(.)))
-
-rbind(con_only_words, noncon_only_words) %>% 
-  ggplot(aes(x = reorder(feature, desc(index)), y = freq_std)) +
-  geom_col(aes(fill=group)) +
-  scale_fill_manual(values = c("Consultant Used" = "#1f77b4", "Consultant Not Used" = "#ff7f0e")) +
-  coord_flip() +
-  labs(x = "Term", y = "Relative Frequency") +
-  theme_minimal()
-```
-
-Words that show up in at least 5% of each corpus subset and not in the other corpus subset.
-
-## Relative Theme Use 
-
-```{r}
-ej_dfm_dict <- ej_dfm_tfidf %>% 
+ej_dfm_dict <- ej_dfm %>% 
   dfm_lookup(ej_dictionary, 
              valuetype = "glob", 
              case_insensitive = TRUE) 
@@ -610,13 +506,181 @@ inner_join(noncon_agg, con_agg, by = "feature", suffix = c(".noncon", ".con")) %
 
 ```
 
-## Recap
+## Hypothesis 2b
 
-1. **H1 Supported**: Plans with shared consultants have higher similarity.
-2. **H2 Supported**: Plans without consultants have lower similarity.
-3. **Consultant-Written Plans:**
-   - Have *different* unique vocabulary
-   - Discuss EJ themes with more frequency
+Consultants will differentially promote forms of EJ, such that procedural justice is advanced more than distributive justice, which is advanced more than recognitional justice.
+
+```{r}
+#| echo: false
+#| warning: false
+#| results: asis
+
+ej_freq_df <- convert(ej_dfm_dict, 'data.frame') %>% 
+  mutate(across(where(is.numeric), round, digits = 0)) %>%
+  left_join(docvar_df, by = "doc_id") %>% 
+  tibble() %>% 
+  mutate(rec_jus = identifying_disadvantaged_communities,
+         proc_jus = promoting_civic_engagement,
+         dis_jus = reducing_pollution_exposure_air_quality + 
+           promoting_public_facilities + 
+           promoting_safe_sanitary_homes + 
+           promoting_physical_activity + 
+           reducing_unique_compounded_health_risks,
+         ej = rec_jus + proc_jus + dis_jus,
+         mhi1000 = mhi / 1000,
+         pop1000 = population / 1000,
+         consultant_binary = as.factor(consultant_binary))
+
+rec_mod <- glm(rec_jus ~ plan_type-1 + plan_year + pop1000 + per_latino + per_black + mhi1000 + plan_length + consultant_binary,
+     data = ej_freq_df,
+     family = 'poisson')
+
+proc_mod <- glm(proc_jus ~  plan_type-1 + plan_year + pop1000 + per_latino + per_black + mhi1000 + plan_length + consultant_binary,
+     data = ej_freq_df,
+     family = 'poisson')
+
+dis_mod <- glm(dis_jus ~  plan_type-1 + plan_year + pop1000 + per_latino + per_black + mhi1000 + plan_length + consultant_binary ,
+     data = ej_freq_df,
+     family = 'poisson')
+
+plot_models(rec_mod, proc_mod, dis_mod,
+            rm.terms = c("plan_type [EJE, GP, HE]", 
+                         "plan_year", 
+                         'pop1000', 
+                         'mhi1000', 
+                         'plan_length'),
+            m.labels = c("Recognitional Justice", 
+                         "Procedural Justice", 
+                         "Distributive Justice"),
+            axis.labels = c('Consultant Use', 
+                            'Percent Black', 
+                            'Percent Latino')
+            )
+
+
+```
+
+## Hypothesis 3
+
+Consultant-written plans will use **more technical language** than plans written without consultants and **less experiential language** than plans written without consultants.
+
+```{r}
+#| label: fig-words-only-used
+#| fig-cap: "EJ Terms Used Only by Consultants or Non-Consultants"
+#| echo: false
+#| warning: false
+
+# words only used by consultants and non-consultants
+
+noncon_words <- textstat_frequency(ej_dfm_tfidf,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==0) %>%
+  # filter(frequency > 10) %>% 
+  filter(docfreq > 5) %>%
+  mutate(freq_std = frequency/docfreq,
+         group='Non-Consultants') %>% 
+  tibble()
+
+con_words <- textstat_frequency(ej_dfm_tfidf,
+                    groups=consultant_binary,
+                    force=TRUE) %>% 
+  filter(group==1) %>%
+  # filter(frequency > 10) %>%
+  filter(docfreq > 12) %>%
+  mutate(freq_std = frequency/docfreq,
+         group = 'Consultants') %>% 
+  tibble()
+
+con_only_words <- con_words %>% 
+  anti_join(noncon_words, by = "feature") %>% 
+  arrange(desc(freq_std)) %>% 
+  mutate(index=seq(1, nrow(.)))
+
+max(con_only_words$index) -> start_at
+
+noncon_only_words <- noncon_words %>%
+  anti_join(con_words, by = "feature") %>% 
+  arrange(freq_std) %>% 
+  mutate(index=seq(start_at+1, start_at+nrow(.)))
+
+rbind(con_only_words, noncon_only_words) %>% 
+  rename(`Used Only By` = group) %>% 
+  ggplot(aes(x = reorder(feature, desc(index)), y = freq_std)) +
+  geom_col(aes(fill=`Used Only By`)) +
+  scale_fill_manual(values = c("Consultants" = "#1f77b4", 
+                               "Non-Consultants" = "#ff7f0e")) +
+  coord_flip() +
+  labs(x = "Term", y = "Relative Frequency") +
+  theme_minimal()
+
+```
+
+:::{.notes}
+Consultant Only
+
+    - health aspects (high blood pressure and chronic disease)
+    - food aspects (food deserts, food systems, and fresh fruits)
+    - transportation system changes (accessible transit, walkable community, active transporation infrastructure and programs). 
+
+Non-Consultant Only
+
+    - minority-led governance (racial minorities, tribal government, community centered)
+    - specific environmental threats (wildfire threat, water contaminant, lead exposure). 
+
+The consultant-only terms are often somewhat more bloodless and latent, systemic, or otherwise ethereal compared to the non-consultant-only terms.
+:::
+
+## Hypothesis 3
+
+Consultant-written plans will use **more technical language** than plans written without consultants and **less experiential language** than plans written without consultants.
+
+```{r}
+#| label: fig-words-used
+#| fig-cap: "EJ Terms used more by Consultants and Non-Consultants"
+#| echo: false
+#| results: asis
+
+words_used <- inner_join(noncon_words, con_words, by = "feature") %>% 
+  mutate(diff = freq_std.y-freq_std.x) %>% 
+  arrange(diff) %>% 
+  select(feature, freq_std.x, freq_std.y, diff) 
+
+words_h20 <- words_used %>% 
+  head(20)
+
+words_t20 <- words_used %>% 
+  tail(20)
+
+rbind(words_h20, words_t20) %>% 
+  mutate(`Used More By` = ifelse(diff > 0, "Consultants", "Non-Consultants")) %>%
+  ggplot(aes(x = reorder(feature, diff), y = diff)) +
+  geom_col(aes(fill=`Used More By`)) +
+  scale_fill_manual(values = c("Consultants" = "#1f77b4", 
+                               "Non-Consultants" = "#ff7f0e")) +
+  coord_flip() +
+  labs(x = "Term", y = "Difference in Relative Frequency") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+:::{.notes}
+Consultant
+    
+    - high-level ideas about combating or dealing with climate change (adaptation, resilience, and green infrastructure), 
+
+Non-Consultant 
+    
+    - lived experience of climate change (cooling centers, extreme heat and hospitalization) 
+    - causes of it (greenhouse gas emission and fossil fuel combustion). 
+
+Non-Consultant
+    
+    - air quality (air quality monitoring, AQMD, mobile sources, fossil fuel combustion), 
+
+Consultant has "reducing pollution"
+:::
 
 ## Why the Difference? {.smaller}
 
@@ -628,21 +692,4 @@ Plans by consultants discuss EJ topics at a greater rate or use EJ-related terms
  - EJ term list for analysis was drawn from state-level guidelines.
  - Consultants may more heavily use state-approved EJ words/phrases.
  - Non-consultant plans might not address EJ less, but *differently*, using vocabulary not explicitly from state recommendations.
-
-## Next Steps & Further Research {.smaller}
-
-- Consultants play a significant role in the EJ planning process.
-- The *how* and *what* consultants do differently is not fully understood.
-- **Future Research Directions:**
-    - Develop hypotheses based on literature about consultant actions, assigned tasks, and completion methods.
-    - Move from term-based to topic-based document models (measure semantic meaning).
-    - Employ a more atomic view of documents to compare if, when, and where topics are discussed.
-
-# Thank You!
-
-Questions?
-
-
-
-
 
