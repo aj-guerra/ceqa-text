@@ -1,0 +1,26 @@
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*_cache/
+*_files/
+
+# Large corpus objects (rebuild with R/pdf_process.R)
+data/plans_corpus_doc.rds
+data/plans_corpus_by_page.rds
+
+# Intermediate / generated
+data/temp.csv
+downloaded_pdfs/
+
+# macOS
+.DS_Store
+
+# Quarto rendered output
+output/*.pdf
+output/*.html
+output/pol_essay_final_files/
+output/esp_essay_final_files/
+output/pol_presentation_files/
+output/esp_presentation_files/

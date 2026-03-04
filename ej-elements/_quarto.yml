@@ -1,0 +1,5 @@
+project:
+  type: default
+
+execute:
+  execute-dir: project   # all code-chunk paths are relative to repo root
